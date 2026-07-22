@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cq8h7rdp0siyg"]
 
-[ext_resource type="Script" path="res://map_editor.gd" id="1_4scgd"]
-[ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://dijkstra.tscn" id="2_5tdvm"]
+[ext_resource type="Script" path="res://src/map_editor/map_editor.gd" id="1_4scgd"]
+[ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://src/pathfinding/dijkstra.tscn" id="2_5tdvm"]
 
 [sub_resource type="FontFile" id="FontFile_q0kni"]
 cache/0/16/0/ascent = 0.0

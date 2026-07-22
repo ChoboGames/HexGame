@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://o7ip7a0sqqwk"]
 
-[ext_resource type="Script" path="res://unit.gd" id="1_5mdss"]
-[ext_resource type="Texture2D" uid="uid://doupyl2ipxjhw" path="res://circlewhite.png" id="2_xu1l6"]
+[ext_resource type="Script" path="res://src/units/unit.gd" id="1_5mdss"]
+[ext_resource type="Texture2D" uid="uid://doupyl2ipxjhw" path="res://assets/textures/circlewhite.png" id="2_xu1l6"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_l0ydg"]
 font_size = 200

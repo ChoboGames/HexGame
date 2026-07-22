@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://hdo4hkw2d7p3"]
 
-[ext_resource type="PackedScene" uid="uid://o7ip7a0sqqwk" path="res://unit.tscn" id="1_b280t"]
+[ext_resource type="PackedScene" uid="uid://o7ip7a0sqqwk" path="res://src/units/unit.tscn" id="1_b280t"]
 
 [node name="King" type="Node2D"]
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bsihwntj1bymn"]
 
-[ext_resource type="PackedScene" uid="uid://o7ip7a0sqqwk" path="res://unit.tscn" id="1_e0ic7"]
+[ext_resource type="PackedScene" uid="uid://o7ip7a0sqqwk" path="res://src/units/unit.tscn" id="1_e0ic7"]
 
 [node name="Zealot" type="Node2D"]
 

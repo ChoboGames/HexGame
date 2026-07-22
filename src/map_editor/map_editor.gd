@@ -36,7 +36,7 @@ func _ready():
 	for i in range(height):
 		grid.insert(i, [])
 		for j in range(width):
-			var hex = load("res://hex.tscn").instantiate()
+			var hex = load("res://src/hex/hex.tscn").instantiate()
 			hex.name = str(i) + "," + str(j)
 			hex.i = i
 			hex.j = j
@@ -96,7 +96,7 @@ func on_hex_pressed(hex):
 
 func create_unit(hex):
 	var unit_name = unit_selector.get_item_text(unit_selector.selected).to_lower()
-	var unit = load("res://" + unit_name + ".tscn").instantiate()
+	var unit = load("res://src/units/" + unit_name + ".tscn").instantiate()
 	
 	var unit_component = unit.get_node("UnitComponent")
 	unit_component.set_hex(hex)
