@@ -15,10 +15,26 @@ extends Node2D
 var hp: int
 var player_index: int
 var hex
+var movement_used: int = 0
+var has_attacked: bool = false
 
 func set_player_index(idx: int):
 	player_index = idx
-	set_modulate(Color(1 * player_index, 0.5, 1 * (1 - player_index), 1))
+	update_action_visual()
+
+func is_exhausted() -> bool:
+	return movement_used >= movement and has_attacked
+
+func refresh():
+	movement_used = 0
+	has_attacked = false
+	update_action_visual()
+
+func update_action_visual():
+	var color = Color(1 * player_index, 0.5, 1 * (1 - player_index), 1)
+	if is_exhausted():
+		color.a = 0.4
+	set_modulate(color)
 
 func apply_stats():
 	if stats:

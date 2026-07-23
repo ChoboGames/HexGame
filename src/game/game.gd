@@ -10,7 +10,7 @@ static var selected_map_path: String = ""
 @onready var turn_label = $CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/Turn
 
 var turn = 0
-var distance_objects = []
+var distance_objects = {}
 var attack_objects = []
 var old_hex = null
 var grid = []
@@ -58,6 +58,24 @@ func reset_colors() -> void:
 		for j in range(width):
 			if grid[i][j] and grid[i][j].activated:
 				grid[i][j].set_modulate(Color(1, 1, 1, 1))
+
+func clear_selection() -> void:
+	old_hex = null
+	distance_objects = {}
+	attack_objects = []
+	reset_colors()
+
+func show_available_actions(hex) -> void:
+	var unit = hex.unit
+	reset_colors()
+	if unit.movement_used < unit.movement:
+		distance_objects = $Dijkstra.color_hexagons(hex, unit.movement - unit.movement_used)
+	else:
+		distance_objects = {}
+	if not unit.has_attacked:
+		attack_objects = $Dijkstra.color_hexagon_attack(hex, unit.range)
+	else:
+		attack_objects = []
 
 func clear_units() -> void:
 	for i in range(height):
@@ -110,27 +128,39 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	add_child(unit_scene)
 
 func on_hex_pressed(hex) -> void:
-	if hex == old_hex:
-		distance_objects = null
-		attack_objects = null
-		reset_colors()
-		hex = null
-		old_hex = null
+	if old_hex != null and hex == old_hex:
+		clear_selection()
 		return
-	if distance_objects:
+		
+	if old_hex != null:
+		var unit = old_hex.unit
 		if hex in distance_objects:
-			var unit = old_hex.unit
+			var cost = distance_objects[hex]
 			old_hex.unit = null
 			unit.set_hex(hex)
-			reset_colors()
+			unit.movement_used += cost
+			unit.update_action_visual()
+			old_hex = hex
+			if unit.movement_used < unit.movement or not unit.has_attacked:
+				show_available_actions(hex)
+			else:
+				clear_selection()
+			return
 		elif hex in attack_objects:
-			old_hex.unit.attack(hex.unit)
-		distance_objects = null
-	elif hex.unit and hex.unit.player_index == turn:
-		reset_colors()
-		distance_objects = $Dijkstra.color_hexagons(hex, hex.unit.movement)
-		attack_objects = $Dijkstra.color_hexagon_attack(hex, hex.unit.range)
+			unit.attack(hex.unit)
+			unit.has_attacked = true
+			unit.update_action_visual()
+			if unit.movement_used < unit.movement:
+				show_available_actions(old_hex)
+			else:
+				clear_selection()
+			return
+		else:
+			clear_selection()
+			
+	if hex.unit and hex.unit.player_index == turn and not hex.unit.is_exhausted():
 		old_hex = hex
+		show_available_actions(hex)
 
 func connect_up_left(i, j) -> void:
 	var hex = grid[i][j]
@@ -173,10 +203,14 @@ func do_connections() -> void:
 			connect_down_right(i, j)
 
 func _on_finish_turn_pressed() -> void:
-	reset_colors()
+	clear_selection()
 	turn = int(!turn)
 	if turn_label:
 		turn_label.text = str(turn)
+	for i in range(height):
+		for j in range(width):
+			if grid[i][j] and grid[i][j].unit:
+				grid[i][j].unit.refresh()
 
 func _on_back_to_menu_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/ui/main_menu.tscn")
