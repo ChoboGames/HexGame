@@ -56,10 +56,6 @@ func _ready() -> void:
 	
 	if not map_data.is_empty():
 		apply_map_data(map_data)
-	else:
-		for i in range(6):
-			for j in range(6):
-				get_or_create_hex(Vector2i(i, j))
 
 	_on_tool_brush_pressed()
 	_on_size_1_pressed()
