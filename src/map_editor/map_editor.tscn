@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cq8h7rdp0siyg"]
+[gd_scene load_steps=5 format=3 uid="uid://cq8h7rdp0siyg"]
 
 [ext_resource type="Script" path="res://src/map_editor/map_editor.gd" id="1_4scgd"]
 [ext_resource type="Script" path="res://src/camera/camera_controller.gd" id="2_camera"]
+[ext_resource type="Script" path="res://src/map_editor/grid_overlay.gd" id="3_grid_overlay"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
 bg_color = Color(0.14, 0.16, 0.24, 0.98)
@@ -19,8 +20,9 @@ shadow_color = Color(0, 0, 0, 0.6)
 
 [node name="MapEditor" type="Node2D"]
 script = ExtResource("1_4scgd")
-width = 6
-height = 6
+
+[node name="GridOverlay" type="Node2D" parent="."]
+script = ExtResource("3_grid_overlay")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2968, 37)
@@ -33,131 +35,192 @@ layer = 10
 [node name="TopBar" type="PanelContainer" parent="CanvasLayerUI"]
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 55.0
+offset_bottom = 50.0
 grow_horizontal = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/TopBar"]
 layout_mode = 2
 theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 8
+theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_bottom = 6
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/TopBar/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 10
 
 [node name="BackToMenuBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "🏠 Menú Principal"
+tooltip_text = "Menú Principal"
+theme_override_font_sizes/font_size = 18
+text = "🏠"
 
 [node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 
 [node name="LoadMapBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "📂 Cargar Mapa"
-
-[node name="VSeparator2" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="SaveLabel" type="Label" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Nombre del Mapa:"
+tooltip_text = "Cargar Mapa Guardado"
+theme_override_font_sizes/font_size = 18
+text = "📂"
 
 [node name="MapNameInput" type="LineEdit" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 placeholder_text = "Nombre del Mapa"
 text = "MiMapa"
 
 [node name="SaveMapBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "💾 Guardar Mapa"
+tooltip_text = "Guardar Mapa"
+theme_override_font_sizes/font_size = 18
+text = "💾"
+
+[node name="VSeparator2" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="LabelDimensions" type="Label" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "0 Hexes"
+
+[node name="BtnExpandCanvas" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Expandir Lienzo"
+theme_override_font_sizes/font_size = 18
+text = "➕"
+
+[node name="BtnClearCanvas" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Limpiar Tablero Completo"
+theme_override_font_sizes/font_size = 18
+text = "🗑️"
 
 [node name="StatusLabel" type="Label" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 
 [node name="EditorToolBar" type="PanelContainer" parent="CanvasLayerUI"]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -60.0
+offset_top = -55.0
 grow_horizontal = 2
 grow_vertical = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/EditorToolBar"]
 layout_mode = 2
 theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 8
+theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_bottom = 6
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/EditorToolBar/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 10
 
-[node name="ToolLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+[node name="BtnToolBrush" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(42, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Modo:"
+tooltip_text = "Pincel de Terreno (Pintar)"
+theme_override_font_sizes/font_size = 20
+text = "🖌️"
 
-[node name="BtnModeTerrain" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+[node name="BtnToolEraser" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(42, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "🗺️ Terreno (Click para Activar/Desactivar)"
+tooltip_text = "Borrador de Terreno"
+theme_override_font_sizes/font_size = 20
+text = "🧹"
 
-[node name="BtnModeUnits" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+[node name="BtnToolUnits" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(42, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "⚔️ Colocar Unidades"
+tooltip_text = "Colocar / Quitar Unidades"
+theme_override_font_sizes/font_size = 20
+text = "⚔️"
 
 [node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="UnitLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+[node name="SizeContainer" type="HBoxContainer" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Unidad:"
+theme_override_constants/separation = 6
 
-[node name="UnitSelector" type="OptionButton" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(130, 0)
+[node name="BtnSize1" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer"]
+custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-item_count = 4
-selected = 0
-popup/item_0/text = "King"
-popup/item_0/id = 0
-popup/item_1/text = "Zealot"
-popup/item_1/id = 1
-popup/item_2/text = "Marine"
-popup/item_2/id = 2
-popup/item_3/text = "Zergling"
-popup/item_3/id = 3
+tooltip_text = "Pincel 1x1 (Una Casilla)"
+theme_override_font_sizes/font_size = 18
+text = "⚫"
 
-[node name="PlayerLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+[node name="BtnSize2" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer"]
+custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Jugador:"
+tooltip_text = "Pincel Radio 2 (Casilla + 6 Vecinos)"
+theme_override_font_sizes/font_size = 18
+text = "🟡"
 
-[node name="PlayerSelector" type="OptionButton" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(120, 0)
+[node name="BtnSize3" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer"]
+custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-item_count = 2
-selected = 0
-popup/item_0/text = "Jugador 1"
-popup/item_0/id = 0
-popup/item_1/text = "Jugador 2"
-popup/item_1/id = 1
+tooltip_text = "Pincel Radio 3 (Área Expandida)"
+theme_override_font_sizes/font_size = 18
+text = "🟠"
+
+[node name="UnitsContainer" type="HBoxContainer" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnPlayer1" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Unidades para Jugador 1"
+theme_override_font_sizes/font_size = 15
+text = "P1"
+
+[node name="BtnPlayer2" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Unidades para Jugador 2"
+theme_override_font_sizes/font_size = 15
+text = "P2"
+
+[node name="VSeparator2" type="VSeparator" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+layout_mode = 2
+
+[node name="BtnUnitKing" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Rey (King)"
+theme_override_font_sizes/font_size = 18
+text = "👑"
+
+[node name="BtnUnitMarine" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Marine"
+theme_override_font_sizes/font_size = 18
+text = "🛡️"
+
+[node name="BtnUnitZealot" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Zealot"
+theme_override_font_sizes/font_size = 18
+text = "🗡️"
+
+[node name="BtnUnitZergling" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Zergling"
+theme_override_font_sizes/font_size = 18
+text = "👾"
 
 [node name="DimOverlay" type="ColorRect" parent="CanvasLayerUI"]
 visible = false
@@ -230,7 +293,19 @@ text = "❌ Cancelar"
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/LoadMapBtn" to="." method="_on_load_map_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/SaveMapBtn" to="." method="_on_save_map_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeTerrain" to="." method="_on_mode_terrain_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeUnits" to="." method="_on_mode_units_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnExpandCanvas" to="." method="_on_expand_canvas_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnClearCanvas" to="." method="_on_clear_canvas_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolBrush" to="." method="_on_tool_brush_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolEraser" to="." method="_on_tool_eraser_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolUnits" to="." method="_on_tool_units_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize1" to="." method="_on_size_1_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize2" to="." method="_on_size_2_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize3" to="." method="_on_size_3_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer1" to="." method="_on_player_1_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer2" to="." method="_on_player_2_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitKing" to="." method="_on_unit_king_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine" to="." method="_on_unit_marine_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot" to="." method="_on_unit_zealot_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling" to="." method="_on_unit_zergling_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]
