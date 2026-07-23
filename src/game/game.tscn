@@ -1,0 +1,68 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8k91jxy28mop"]
+
+[ext_resource type="Script" path="res://src/game/game.gd" id="1_game"]
+[ext_resource type="Script" path="res://src/camera/camera_controller.gd" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://src/pathfinding/dijkstra.tscn" id="3_dijkstra"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+width = 6
+height = 6
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(2968, 37)
+zoom = Vector2(0.145, 0.145)
+script = ExtResource("2_camera")
+
+[node name="Dijkstra" parent="." instance=ExtResource("3_dijkstra")]
+
+[node name="CanvasLayerUI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/GameHUD"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/GameHUD/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="GameBackToMenuBtn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🏠 Menú Principal"
+
+[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TurnTextLabel" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Turno del Jugador:"
+
+[node name="Turn" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="FinishTurn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⌛ Terminar Turno"
+
+[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/GameBackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/FinishTurn" to="." method="_on_finish_turn_pressed"]

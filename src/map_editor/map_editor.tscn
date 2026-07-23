@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cq8h7rdp0siyg"]
 
 [ext_resource type="Script" path="res://src/map_editor/map_editor.gd" id="1_4scgd"]
-[ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://src/pathfinding/dijkstra.tscn" id="2_5tdvm"]
+[ext_resource type="Script" path="res://src/camera/camera_controller.gd" id="2_camera"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
 bg_color = Color(0.14, 0.16, 0.24, 0.98)
@@ -25,8 +25,7 @@ height = 6
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2968, 37)
 zoom = Vector2(0.145, 0.145)
-
-[node name="Dijkstra" parent="." instance=ExtResource("2_5tdvm")]
+script = ExtResource("2_camera")
 
 [node name="CanvasLayerUI" type="CanvasLayer" parent="."]
 layer = 10
@@ -160,52 +159,6 @@ popup/item_0/id = 0
 popup/item_1/text = "Jugador 2"
 popup/item_1/id = 1
 
-[node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
-visible = false
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -60.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/GameHUD"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 8
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/GameHUD/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="GameBackToMenuBtn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "🏠 Menú Principal"
-
-[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="TurnTextLabel" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Turno del Jugador:"
-
-[node name="Turn" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 20
-text = "0"
-
-[node name="FinishTurn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(160, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "⌛ Terminar Turno"
-
 [node name="DimOverlay" type="ColorRect" parent="CanvasLayerUI"]
 visible = false
 anchors_preset = 15
@@ -279,7 +232,5 @@ text = "❌ Cancelar"
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/SaveMapBtn" to="." method="_on_save_map_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeTerrain" to="." method="_on_mode_terrain_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeUnits" to="." method="_on_mode_units_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/GameBackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/FinishTurn" to="." method="_on_finish_turn_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]
