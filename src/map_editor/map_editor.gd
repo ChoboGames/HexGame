@@ -445,18 +445,20 @@ func _on_save_map_pressed() -> void:
 	var max_i = coords[0].x
 	var min_j = coords[0].y
 	var max_j = coords[0].y
-	var active_list: Array = []
 	
 	for c in coords:
 		min_i = min(min_i, c.x)
 		max_i = max(max_i, c.x)
 		min_j = min(min_j, c.y)
 		max_j = max(max_j, c.y)
-		active_list.append([c.x, c.y])
 		
-	var width_val = max_i - min_i + 1
-	var height_val = max_j - min_j + 1
+	var width_val = max_j - min_j + 1
+	var height_val = max_i - min_i + 1
 	
+	var active_list: Array = []
+	for c in coords:
+		active_list.append([c.x - min_i, c.y - min_j])
+		
 	var units_data: Array = []
 	for c in coords:
 		var hex = active_hexes[c]
@@ -473,13 +475,13 @@ func _on_save_map_pressed() -> void:
 				unit_type = "zergling"
 				
 			units_data.append({
-				"i": c.x,
-				"j": c.y,
+				"i": c.x - min_i,
+				"j": c.y - min_j,
 				"unit_type": unit_type,
 				"player_index": hex.unit.player_index
 			})
 	
-	var saved_path = MapSerializer.save_map(map_name, max(6, width_val + max_i), max(6, height_val + max_j), active_list, units_data)
+	var saved_path = MapSerializer.save_map(map_name, width_val, height_val, active_list, units_data)
 	if not saved_path.is_empty():
 		save_status_label.text = "¡Mapa guardado exitosamente!"
 	else:
