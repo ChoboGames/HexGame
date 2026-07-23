@@ -3,43 +3,19 @@
 [ext_resource type="Script" path="res://src/map_editor/map_editor.gd" id="1_4scgd"]
 [ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://src/pathfinding/dijkstra.tscn" id="2_5tdvm"]
 
-[sub_resource type="FontFile" id="FontFile_q0kni"]
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/20/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/40/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/100/0 = Vector2(0, 0)
-cache/0/20/0/ascent = 0.0
-cache/0/20/0/descent = 0.0
-cache/0/20/0/underline_position = 0.0
-cache/0/20/0/underline_thickness = 0.0
-cache/0/20/0/scale = 1.0
-cache/0/20/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/20/0/kerning_overrides/20/0 = Vector2(0, 0)
-cache/0/20/0/kerning_overrides/40/0 = Vector2(0, 0)
-cache/0/20/0/kerning_overrides/100/0 = Vector2(0, 0)
-cache/0/40/0/ascent = 0.0
-cache/0/40/0/descent = 0.0
-cache/0/40/0/underline_position = 0.0
-cache/0/40/0/underline_thickness = 0.0
-cache/0/40/0/scale = 1.0
-cache/0/40/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/40/0/kerning_overrides/20/0 = Vector2(0, 0)
-cache/0/40/0/kerning_overrides/40/0 = Vector2(0, 0)
-cache/0/40/0/kerning_overrides/100/0 = Vector2(0, 0)
-cache/0/100/0/ascent = 0.0
-cache/0/100/0/descent = 0.0
-cache/0/100/0/underline_position = 0.0
-cache/0/100/0/underline_thickness = 0.0
-cache/0/100/0/scale = 1.0
-cache/0/100/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/100/0/kerning_overrides/20/0 = Vector2(0, 0)
-cache/0/100/0/kerning_overrides/40/0 = Vector2(0, 0)
-cache/0/100/0/kerning_overrides/100/0 = Vector2(0, 0)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.14, 0.16, 0.24, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.45, 0.65, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_size = 15
+shadow_color = Color(0, 0, 0, 0.6)
 
 [node name="MapEditor" type="Node2D"]
 script = ExtResource("1_4scgd")
@@ -50,50 +26,113 @@ height = 6
 position = Vector2(2968, 37)
 zoom = Vector2(0.145, 0.145)
 
-[node name="MapHUD" type="Control" parent="Camera2D"]
-layout_mode = 3
-anchors_preset = 0
-offset_left = -2968.0
-offset_top = -37.0
-offset_right = -2928.0
-offset_bottom = 3.0
+[node name="Dijkstra" parent="." instance=ExtResource("2_5tdvm")]
 
-[node name="ToggleEditMode" type="Button" parent="Camera2D/MapHUD"]
-visible = false
-layout_mode = 0
-offset_left = 5809.0
-offset_top = 1176.0
-offset_right = 6701.0
-offset_bottom = 1646.0
-theme_override_fonts/font = SubResource("FontFile_q0kni")
-theme_override_font_sizes/font_size = 100
-text = "Toggle Edit Mode
-"
+[node name="CanvasLayerUI" type="CanvasLayer" parent="."]
+layer = 10
 
-[node name="FinishMap" type="Button" parent="Camera2D/MapHUD"]
-visible = false
-layout_mode = 0
-offset_left = 5809.0
-offset_top = 1710.0
-offset_right = 6677.0
-offset_bottom = 2133.0
-theme_override_font_sizes/font_size = 90
-text = "Finish Map"
+[node name="TopBar" type="PanelContainer" parent="CanvasLayerUI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 55.0
+grow_horizontal = 2
 
-[node name="EditorHUD" type="Control" parent="Camera2D"]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
 
-[node name="UnitSelector" type="OptionButton" parent="Camera2D/EditorHUD"]
-visible = false
-layout_mode = 0
-offset_left = -3407.0
-offset_top = 1378.0
-offset_right = -1962.0
-offset_bottom = 1936.0
-theme_override_font_sizes/font_size = 200
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/TopBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="BackToMenuBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🏠 Menú Principal"
+
+[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="LoadMapBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "📂 Cargar Mapa"
+
+[node name="VSeparator2" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="SaveLabel" type="Label" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Nombre del Mapa:"
+
+[node name="MapNameInput" type="LineEdit" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Nombre del Mapa"
+text = "MiMapa"
+
+[node name="SaveMapBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "💾 Guardar Mapa"
+
+[node name="StatusLabel" type="Label" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="EditorToolBar" type="PanelContainer" parent="CanvasLayerUI"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/EditorToolBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/EditorToolBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ToolLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Modo:"
+
+[node name="BtnModeTerrain" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🗺️ Terreno (Click para Activar/Desactivar)"
+
+[node name="BtnModeUnits" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⚔️ Colocar Unidades"
+
+[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="UnitLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Unidad:"
+
+[node name="UnitSelector" type="OptionButton" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
 item_count = 4
 selected = 0
 popup/item_0/text = "King"
@@ -105,59 +144,142 @@ popup/item_2/id = 2
 popup/item_3/text = "Zergling"
 popup/item_3/id = 3
 
-[node name="PlayerSelector" type="OptionButton" parent="Camera2D/EditorHUD"]
-visible = false
-layout_mode = 0
-offset_left = 2212.0
-offset_top = 1432.0
-offset_right = 3679.0
-offset_bottom = 2061.0
-theme_override_font_sizes/font_size = 200
+[node name="PlayerLabel" type="Label" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Jugador:"
+
+[node name="PlayerSelector" type="OptionButton" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
 item_count = 2
 selected = 0
-popup/item_0/text = "Player1"
+popup/item_0/text = "Jugador 1"
 popup/item_0/id = 0
-popup/item_1/text = "Player2"
+popup/item_1/text = "Jugador 2"
 popup/item_1/id = 1
 
-[node name="StartGame" type="Button" parent="Camera2D/EditorHUD"]
+[node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
 visible = false
-layout_mode = 0
-offset_left = -681.0
-offset_top = 1417.0
-offset_right = 623.0
-offset_bottom = 2044.0
-theme_override_font_sizes/font_size = 150
-text = "Start Game"
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+grow_horizontal = 2
+grow_vertical = 0
 
-[node name="GameHUD" type="Control" parent="Camera2D"]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/GameHUD"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
 
-[node name="FinishTurn" type="Button" parent="Camera2D/GameHUD"]
-layout_mode = 0
-offset_left = 2359.0
-offset_top = 1322.0
-offset_right = 3601.0
-offset_bottom = 1996.0
-theme_override_font_sizes/font_size = 100
-text = "Finish Turn"
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/GameHUD/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
 
-[node name="Turn" type="Label" parent="Camera2D/GameHUD"]
-layout_mode = 0
-offset_left = 3356.0
-offset_top = -1961.0
-offset_right = 3508.0
-offset_bottom = -1688.0
-theme_override_font_sizes/font_size = 200
+[node name="GameBackToMenuBtn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🏠 Menú Principal"
+
+[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TurnTextLabel" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Turno del Jugador:"
+
+[node name="Turn" type="Label" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 20
 text = "0"
 
-[node name="Dijkstra" parent="." instance=ExtResource("2_5tdvm")]
+[node name="FinishTurn" type="Button" parent="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⌛ Terminar Turno"
 
-[connection signal="pressed" from="Camera2D/MapHUD/ToggleEditMode" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="Camera2D/MapHUD/FinishMap" to="." method="_on_finish_map_pressed"]
-[connection signal="pressed" from="Camera2D/EditorHUD/StartGame" to="." method="_on_start_game_pressed"]
-[connection signal="pressed" from="Camera2D/GameHUD/FinishTurn" to="." method="_on_finish_turn_pressed"]
+[node name="DimOverlay" type="ColorRect" parent="CanvasLayerUI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="LoadMapPanel" type="PanelContainer" parent="CanvasLayerUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -140.0
+offset_right = 250.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/LoadMapPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayerUI/LoadMapPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ModalTitle" type="Label" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Abrir Mapa Guardado"
+horizontal_alignment = 1
+
+[node name="MapLoadOptionButton" type="OptionButton" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="Spacer" type="Control" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ConfirmLoadBtn" type="Button" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "📂 Cargar"
+
+[node name="CancelLoadBtn" type="Button" parent="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "❌ Cancelar"
+
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/LoadMapBtn" to="." method="_on_load_map_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/SaveMapBtn" to="." method="_on_save_map_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeTerrain" to="." method="_on_mode_terrain_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeUnits" to="." method="_on_mode_units_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/GameBackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/FinishTurn" to="." method="_on_finish_turn_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]

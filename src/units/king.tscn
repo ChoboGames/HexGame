@@ -1,12 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://hdo4hkw2d7p3"]
+[gd_scene format=3 uid="uid://b26hmnhnu33yl"]
 
 [ext_resource type="PackedScene" uid="uid://o7ip7a0sqqwk" path="res://src/units/unit.tscn" id="1_b280t"]
+[ext_resource type="Resource" path="res://src/units/resources/king_stats.tres" id="2_kingstats"]
 
-[node name="King" type="Node2D"]
+[node name="King" type="Node2D" unique_id=233151310]
 
-[node name="UnitComponent" parent="." instance=ExtResource("1_b280t")]
-unit_letter = "K"
-base_hp = 24
-damage = 3
-movement = 2
-range = 1
+[node name="UnitComponent" parent="." unique_id=502717380 instance=ExtResource("1_b280t")]
+stats = ExtResource("2_kingstats")

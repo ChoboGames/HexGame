@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UnitStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/units/unit_stats.gd" id="1_unitstats"]
+
+[resource]
+script = ExtResource("1_unitstats")
+unit_name = "King"
+unit_letter = "K"
+base_hp = 24
+damage = 3
+movement = 2
+range = 1
