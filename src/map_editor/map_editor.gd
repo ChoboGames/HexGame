@@ -26,7 +26,7 @@ static var launch_mode: String = "EDITOR" # "EDITOR" o "GAME"
 @onready var map_load_option_button = $CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/MapLoadOptionButton
 
 var turn = 0
-var distance_objects = []
+var distance_objects = {}
 var attack_objects = []
 var old_hex = null
 
@@ -45,6 +45,24 @@ func reset_colors():
 		for j in range(width):
 			if grid[i][j] and grid[i][j].activated:
 				grid[i][j].set_modulate(Color(1, 1, 1, 1))
+
+func clear_selection():
+	old_hex = null
+	distance_objects = {}
+	attack_objects = []
+	reset_colors()
+
+func show_available_actions(hex):
+	var unit = hex.unit
+	reset_colors()
+	if unit.movement_used < unit.movement:
+		distance_objects = $Dijkstra.color_hexagons(hex, unit.movement - unit.movement_used)
+	else:
+		distance_objects = {}
+	if not unit.has_attacked:
+		attack_objects = $Dijkstra.color_hexagon_attack(hex, unit.range)
+	else:
+		attack_objects = []
 
 func _ready():
 	dim_overlay.visible = false
@@ -167,6 +185,16 @@ func start_game_mode():
 			hex.visible = hex.activated
 			if hex.activated:
 				hex.set_modulate(Color(1, 1, 1, 1))
+	
+	# Reiniciar turno y refrescar todas las unidades para una nueva partida
+	turn = 0
+	clear_selection()
+	if turn_label:
+		turn_label.text = str(turn)
+	for i in range(height):
+		for j in range(width):
+			if grid[i][j].unit:
+				grid[i][j].unit.refresh()
 
 func _on_mode_terrain_pressed():
 	current_tool = "TERRAIN"
@@ -185,27 +213,45 @@ func _on_mode_units_pressed():
 func on_hex_pressed(hex):
 	if game_started:
 		# Lógica de juego de combate por turnos
-		if hex == old_hex:
-			distance_objects = null
-			attack_objects = null
-			reset_colors()
-			hex = null
-			old_hex = null
+		# Re-seleccionar el mismo hex -> deseleccionar
+		if old_hex != null and hex == old_hex:
+			clear_selection()
 			return
-		if distance_objects:
+		# Si hay unidad seleccionada, intentar ejecutar una acción
+		if old_hex != null:
+			var unit = old_hex.unit
 			if hex in distance_objects:
-				var unit = old_hex.unit
+				# Mover (costo = distancia recorrida en hexágonos)
+				var cost = distance_objects[hex]
 				old_hex.unit = null
 				unit.set_hex(hex)
-				reset_colors()
+				unit.movement_used += cost
+				unit.update_action_visual()
+				old_hex = hex
+				# Selección persistente si aún puede actuar
+				if unit.movement_used < unit.movement or not unit.has_attacked:
+					show_available_actions(hex)
+				else:
+					clear_selection()
+				return
 			elif hex in attack_objects:
-				old_hex.unit.attack(hex.unit)
-			distance_objects = null
-		elif hex.unit and hex.unit.player_index == turn:
-			reset_colors()
-			distance_objects = $Dijkstra.color_hexagons(hex, hex.unit.movement)
-			attack_objects = $Dijkstra.color_hexagon_attack(hex, hex.unit.range)
+				# Atacar
+				unit.attack(hex.unit)
+				unit.has_attacked = true
+				unit.update_action_visual()
+				# Selección persistente si aún puede mover
+				if unit.movement_used < unit.movement:
+					show_available_actions(old_hex)
+				else:
+					clear_selection()
+				return
+			else:
+				# Click en otro lado: limpiar selección y caer a selección
+				clear_selection()
+		# Selección: unidad del jugador actual que aún pueda actuar
+		if hex.unit and hex.unit.player_index == turn and not hex.unit.is_exhausted():
 			old_hex = hex
+			show_available_actions(hex)
 	else:
 		# Lógica del Editor de Mapas
 		if current_tool == "TERRAIN":
@@ -269,10 +315,15 @@ func do_connections():
 			connect_down_right(i, j)
 
 func _on_finish_turn_pressed():
-	reset_colors()
+	clear_selection()
 	turn = int(!turn)
 	if turn_label:
 		turn_label.text = str(turn)
+	# Refrescar todas las unidades al cambiar de turno
+	for i in range(height):
+		for j in range(width):
+			if grid[i][j].unit:
+				grid[i][j].unit.refresh()
 
 func _on_save_map_pressed():
 	var map_name = save_name_input.text.strip_edges()
