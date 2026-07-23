@@ -5,7 +5,7 @@ func color_hexagons(hex, range=0):
 	# hex.set_modulate(Color(1, 1, 1, 1))
 	hex.set_modulate(Color(0.5, 1, 0.5, 1))
 	var distance_objects = dijkstra_hexagonal(hex)
-	var new_distance_objects = []
+	var reachable = {}
 	for distance_object in distance_objects:
 		var destination_hex = distance_object
 		if not destination_hex.visible or destination_hex.unit:
@@ -14,9 +14,9 @@ func color_hexagons(hex, range=0):
 		var player_index = hex.unit.player_index
 		if distance > 0 and range > 0 and distance <= range:
 			destination_hex.set_modulate(Color(1 * player_index, 0.7, 1 * (1 - player_index), 1))
-			new_distance_objects.append(distance_object)
+			reachable[destination_hex] = distance
 
-	return new_distance_objects
+	return reachable
 	
 	
 func color_hexagon_attack(hex, range=0):
