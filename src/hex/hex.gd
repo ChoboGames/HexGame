@@ -21,6 +21,11 @@ var unit
 
 func _ready():
 	$Label.text = name
+	var button = $TextureButton
+	if button and button.texture_normal:
+		var bitmap = BitMap.new()
+		bitmap.create_from_image_alpha(button.texture_normal.get_image())
+		button.texture_click_mask = bitmap
 
 func _on_texture_button_pressed():
 	emit_signal("hex_pressed", self)
