@@ -13,6 +13,9 @@ static var selected_map_path: String = ""
 @onready var top_bar = $CanvasLayerUI/TopBar
 @onready var editor_toolbar = $CanvasLayerUI/EditorToolBar
 
+@onready var btn_undo = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnUndo
+@onready var btn_redo = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnRedo
+
 @onready var btn_tool_brush = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolBrush
 @onready var btn_tool_eraser = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolEraser
 @onready var btn_tool_units = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolUnits
@@ -43,10 +46,16 @@ var is_left_clicking: bool = false
 var active_hexes: Dictionary = {} # Vector2i(i, j) -> Hex Node2D
 var available_editor_maps: Array = []
 
+var undo_stack: Array = []
+var redo_stack: Array = []
+const MAX_UNDO_HISTORY: int = 50
+
 func _ready() -> void:
 	dim_overlay.visible = false
 	load_map_panel.visible = false
 	active_hexes.clear()
+	undo_stack.clear()
+	redo_stack.clear()
 	
 	var map_data: Dictionary = {}
 	if not selected_map_path.is_empty():
@@ -62,6 +71,7 @@ func _ready() -> void:
 	_on_player_1_pressed()
 	_on_unit_marine_pressed()
 	update_overlay()
+	update_undo_redo_ui()
 
 func update_dimensions_label() -> void:
 	if label_dimensions:
@@ -71,6 +81,65 @@ func update_overlay() -> void:
 	if grid_overlay:
 		grid_overlay.update_bounds_from_coords(active_hexes.keys(), active_hexes)
 	update_dimensions_label()
+
+func update_undo_redo_ui() -> void:
+	if btn_undo:
+		btn_undo.disabled = undo_stack.is_empty()
+	if btn_redo:
+		btn_redo.disabled = redo_stack.is_empty()
+
+func get_map_snapshot() -> Dictionary:
+	var active_coords: Array = []
+	var units_data: Array = []
+	
+	for c in active_hexes.keys():
+		active_coords.append([c.x, c.y])
+		var hex = active_hexes[c]
+		if hex and hex.unit:
+			var unit_type = "marine"
+			if hex.unit.stats:
+				unit_type = hex.unit.stats.unit_name.to_lower()
+			elif not hex.unit.scene_file_path.is_empty():
+				unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
+			else:
+				unit_type = hex.unit.name.to_lower()
+			if unit_type == "ling":
+				unit_type = "zergling"
+			units_data.append({
+				"i": c.x,
+				"j": c.y,
+				"unit_type": unit_type,
+				"player_index": hex.unit.player_index
+			})
+	return {
+		"active_hexes": active_coords,
+		"units": units_data
+	}
+
+func record_undo_state() -> void:
+	undo_stack.append(get_map_snapshot())
+	if undo_stack.size() > MAX_UNDO_HISTORY:
+		undo_stack.pop_front()
+	redo_stack.clear()
+	update_undo_redo_ui()
+
+func undo() -> void:
+	if undo_stack.is_empty():
+		return
+	redo_stack.append(get_map_snapshot())
+	var prev_state = undo_stack.pop_back()
+	apply_map_data(prev_state)
+	update_undo_redo_ui()
+	save_status_label.text = "Deshecho (Undo)"
+
+func redo() -> void:
+	if redo_stack.is_empty():
+		return
+	undo_stack.append(get_map_snapshot())
+	var next_state = redo_stack.pop_back()
+	apply_map_data(next_state)
+	update_undo_redo_ui()
+	save_status_label.text = "Rehecho (Redo)"
 
 func is_mouse_over_ui() -> bool:
 	var mouse_pos = get_viewport().get_mouse_position()
@@ -83,9 +152,25 @@ func is_mouse_over_ui() -> bool:
 	return false
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		var is_ctrl = event.ctrl_pressed or event.command_or_control_autoremap
+		if is_ctrl and event.keycode == KEY_Z:
+			if event.shift_pressed:
+				redo()
+			else:
+				undo()
+			get_viewport().set_input_as_handled()
+			return
+		elif is_ctrl and event.keycode == KEY_Y:
+			redo()
+			get_viewport().set_input_as_handled()
+			return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		var was_clicking = is_left_clicking
 		is_left_clicking = event.pressed
-		if is_left_clicking and not is_mouse_over_ui():
+		if is_left_clicking and not was_clicking and not is_mouse_over_ui():
+			record_undo_state()
 			var mouse_pos = get_global_mouse_position()
 			var coord = ShapeGenerator.world_to_hex(mouse_pos)
 			apply_tool_at_coord(coord)
@@ -145,6 +230,7 @@ func reconnect_all_neighbors() -> void:
 		hex.down_right = active_hexes.get(Vector2i(coord.x + 1, coord.y))
 
 func _on_expand_canvas_pressed() -> void:
+	record_undo_state()
 	var coords = active_hexes.keys()
 	if coords.is_empty():
 		for i in range(6):
@@ -167,6 +253,7 @@ func _on_expand_canvas_pressed() -> void:
 			get_or_create_hex(Vector2i(i, j))
 
 func _on_clear_canvas_pressed() -> void:
+	record_undo_state()
 	for coord in active_hexes.keys():
 		var hex = active_hexes[coord]
 		if hex.unit:
@@ -183,7 +270,7 @@ func clear_units() -> void:
 			hex.unit = null
 
 func apply_map_data(map_data: Dictionary) -> void:
-	_on_clear_canvas_pressed()
+	_on_clear_canvas_pressed_internal()
 	
 	var active_coords = map_data.get("active_hexes", [])
 	for coord in active_coords:
@@ -199,6 +286,15 @@ func apply_map_data(map_data: Dictionary) -> void:
 		var player_idx = int(unit_data.get("player_index", 0))
 		var hex = get_or_create_hex(Vector2i(i, j))
 		spawn_unit_at(hex, unit_type, player_idx)
+
+func _on_clear_canvas_pressed_internal() -> void:
+	for coord in active_hexes.keys():
+		var hex = active_hexes[coord]
+		if hex.unit:
+			hex.unit.queue_free()
+		hex.queue_free()
+	active_hexes.clear()
+	update_overlay()
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	var clean_type = unit_type.to_lower()
@@ -409,6 +505,7 @@ func _on_confirm_load_pressed() -> void:
 		var chosen_map = available_editor_maps[selected_idx]
 		var map_data = MapSerializer.load_map(chosen_map.get("path", ""))
 		if not map_data.is_empty():
+			record_undo_state()
 			apply_map_data(map_data)
 			if map_data.has("name"):
 				save_name_input.text = map_data.get("name")
@@ -420,6 +517,12 @@ func _on_confirm_load_pressed() -> void:
 func _on_cancel_load_pressed() -> void:
 	dim_overlay.visible = false
 	load_map_panel.visible = false
+
+func _on_undo_pressed() -> void:
+	undo()
+
+func _on_redo_pressed() -> void:
+	redo()
 
 func _on_back_to_menu_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/ui/main_menu.tscn")

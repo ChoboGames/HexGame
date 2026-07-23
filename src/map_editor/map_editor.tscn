@@ -58,6 +58,21 @@ text = "🏠"
 [node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 
+[node name="BtnUndo" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Deshacer (Ctrl+Z)"
+theme_override_font_sizes/font_size = 18
+text = "↩️"
+
+[node name="BtnRedo" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Rehacer (Ctrl+Shift+Z / Ctrl+Y)"
+theme_override_font_sizes/font_size = 18
+text = "↪️"
+
+[node name="VSeparatorUndo" type="VSeparator" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
 [node name="LoadMapBtn" type="Button" parent="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 tooltip_text = "Cargar Mapa Guardado"
@@ -291,6 +306,8 @@ theme_override_font_sizes/font_size = 16
 text = "❌ Cancelar"
 
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnUndo" to="." method="_on_undo_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnRedo" to="." method="_on_redo_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/LoadMapBtn" to="." method="_on_load_map_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/SaveMapBtn" to="." method="_on_save_map_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnExpandCanvas" to="." method="_on_expand_canvas_pressed"]
