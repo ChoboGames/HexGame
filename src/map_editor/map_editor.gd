@@ -170,10 +170,11 @@ func _input(event: InputEvent) -> void:
 		var was_clicking = is_left_clicking
 		is_left_clicking = event.pressed
 		if is_left_clicking and not was_clicking and not is_mouse_over_ui():
-			record_undo_state()
 			var mouse_pos = get_global_mouse_position()
 			var coord = ShapeGenerator.world_to_hex(mouse_pos)
-			apply_tool_at_coord(coord)
+			if not active_hexes.has(coord):
+				record_undo_state()
+				apply_tool_at_coord(coord)
 			
 	elif event is InputEventMouseMotion:
 		if not is_mouse_over_ui():
@@ -422,6 +423,7 @@ func apply_tool_at_coord(center_coord: Vector2i) -> void:
 
 func on_hex_pressed(hex) -> void:
 	if hex and not is_mouse_over_ui():
+		record_undo_state()
 		apply_tool_at_coord(Vector2i(hex.i, hex.j))
 
 func on_hex_hovered(hex) -> void:
