@@ -25,6 +25,8 @@ func _ready():
 	if button and button.texture_normal:
 		var bitmap = BitMap.new()
 		bitmap.create_from_image_alpha(button.texture_normal.get_image())
+		# Se hace de esta forma para asegurarnos que la parte clickeable de cada hexagono
+		# corresponda a la parte visual del hexagono
 		button.texture_click_mask = bitmap
 
 func _on_texture_button_pressed():
