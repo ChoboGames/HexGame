@@ -8,12 +8,15 @@ static var selected_map_path: String = ""
 @export var height = 6
 
 @onready var turn_label = $CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/Turn
+@onready var victory_panel = $CanvasLayerUI/VictoryPanel
+@onready var victory_message = $CanvasLayerUI/VictoryPanel/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryMessage
 
 var turn = 0
 var distance_objects = {}
 var attack_objects = []
 var old_hex = null
 var grid = []
+var is_game_over: bool = false
 
 func _ready() -> void:
 	grid = []
@@ -125,9 +128,25 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 		
 	unit_scene.set_player_index(player_idx)
 	unit_scene.set_hex(hex)
+	unit_scene.unit_died.connect(_on_unit_died)
 	add_child(unit_scene)
 
+func _on_unit_died(unit) -> void:
+	if is_game_over:
+		return
+	if unit and unit.is_king():
+		is_game_over = true
+		clear_selection()
+		var winner_player = 1 - unit.player_index
+		if victory_message:
+			victory_message.text = "¡El Jugador " + str(winner_player) + " ha ganado!"
+		if victory_panel:
+			victory_panel.visible = true
+
 func on_hex_pressed(hex) -> void:
+	if is_game_over:
+		return
+		
 	if old_hex != null and hex == old_hex:
 		clear_selection()
 		return
@@ -150,6 +169,8 @@ func on_hex_pressed(hex) -> void:
 			unit.attack(hex.unit)
 			unit.has_attacked = true
 			unit.update_action_visual()
+			if is_game_over:
+				return
 			if unit.movement_used < unit.movement:
 				show_available_actions(old_hex)
 			else:
@@ -203,6 +224,8 @@ func do_connections() -> void:
 			connect_down_right(i, j)
 
 func _on_finish_turn_pressed() -> void:
+	if is_game_over:
+		return
 	clear_selection()
 	turn = int(!turn)
 	if turn_label:
@@ -211,6 +234,9 @@ func _on_finish_turn_pressed() -> void:
 		for j in range(width):
 			if grid[i][j] and grid[i][j].unit:
 				grid[i][j].unit.refresh()
+
+func _on_restart_pressed() -> void:
+	get_tree().reload_current_scene()
 
 func _on_back_to_menu_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/ui/main_menu.tscn")
