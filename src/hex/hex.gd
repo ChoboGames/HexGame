@@ -16,15 +16,27 @@ signal hex_pressed
 signal hex_hovered
 
 var unit
+var terrain_type: String = "grass"
 
 func _ready():
 	$Label.text = name
+	set_terrain_type(terrain_type)
+
+func set_terrain_type(new_type: String) -> void:
+	terrain_type = new_type
 	var button = $TextureButton
-	if button and button.texture_normal:
+	if not button:
+		return
+		
+	var path = "res://assets/textures/terrain/hex_" + new_type + ".png"
+	if not ResourceLoader.exists(path):
+		path = "res://assets/textures/hexagon.png"
+		
+	var texture = load(path)
+	if texture:
+		button.texture_normal = texture
 		var bitmap = BitMap.new()
-		bitmap.create_from_image_alpha(button.texture_normal.get_image())
-		# Se hace de esta forma para asegurarnos que la parte clickeable de cada hexagono
-		# corresponda a la parte visual del hexagono
+		bitmap.create_from_image_alpha(texture.get_image())
 		button.texture_click_mask = bitmap
 
 func _on_texture_button_pressed():

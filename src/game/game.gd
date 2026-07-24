@@ -101,9 +101,13 @@ func apply_map_data(map_data: Dictionary) -> void:
 		for coord in active_hexes:
 			var i = int(coord[0])
 			var j = int(coord[1])
+			var terrain = "grass"
+			if coord.size() > 2:
+				terrain = str(coord[2])
 			if i >= 0 and i < height and j >= 0 and j < width:
 				grid[i][j].activated = true
 				grid[i][j].visible = true
+				grid[i][j].set_terrain_type(terrain)
 				grid[i][j].set_modulate(Color(1, 1, 1, 1))
 
 	var saved_units = map_data.get("units", [])

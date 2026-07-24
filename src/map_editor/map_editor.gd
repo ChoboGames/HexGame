@@ -37,10 +37,17 @@ static var selected_map_path: String = ""
 @onready var load_map_panel = $CanvasLayerUI/LoadMapPanel
 @onready var map_load_option_button = $CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/MapLoadOptionButton
 
+@onready var terrain_menu = $CanvasLayerUI/TerrainMenu
+@onready var btn_terrain_grass = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainGrass
+@onready var btn_terrain_mountain = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainMountain
+@onready var btn_terrain_water = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainWater
+@onready var btn_terrain_swamp = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainSwamp
+
 var current_tool: String = "BRUSH" # "BRUSH", "ERASER", "UNITS"
 var current_brush_size: int = 1 # 1, 2, 3
 var selected_unit_type: String = "marine"
 var selected_player_index: int = 0
+var selected_terrain: String = "grass"
 
 var is_left_clicking: bool = false
 var active_hexes: Dictionary = {} # Vector2i(i, j) -> Hex Node2D
@@ -53,6 +60,7 @@ const MAX_UNDO_HISTORY: int = 50
 func _ready() -> void:
 	dim_overlay.visible = false
 	load_map_panel.visible = false
+	terrain_menu.visible = false
 	active_hexes.clear()
 	undo_stack.clear()
 	redo_stack.clear()
@@ -67,9 +75,11 @@ func _ready() -> void:
 		apply_map_data(map_data)
 
 	_on_tool_brush_pressed()
+	terrain_menu.visible = false
 	_on_size_1_pressed()
 	_on_player_1_pressed()
 	_on_unit_marine_pressed()
+	_on_terrain_grass_pressed()
 	update_overlay()
 	update_undo_redo_ui()
 
@@ -93,8 +103,11 @@ func get_map_snapshot() -> Dictionary:
 	var units_data: Array = []
 	
 	for c in active_hexes.keys():
-		active_coords.append([c.x, c.y])
 		var hex = active_hexes[c]
+		var terrain = "grass"
+		if hex and "terrain_type" in hex:
+			terrain = hex.terrain_type
+		active_coords.append([c.x, c.y, terrain])
 		if hex and hex.unit:
 			var unit_type = "marine"
 			if hex.unit.stats:
@@ -146,6 +159,8 @@ func is_mouse_over_ui() -> bool:
 	if top_bar and top_bar.visible and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
 	if editor_toolbar and editor_toolbar.visible and editor_toolbar.get_global_rect().has_point(mouse_pos):
+		return true
+	if terrain_menu and terrain_menu.visible and terrain_menu.get_global_rect().has_point(mouse_pos):
 		return true
 	if load_map_panel and load_map_panel.visible and load_map_panel.get_global_rect().has_point(mouse_pos):
 		return true
@@ -277,7 +292,11 @@ func apply_map_data(map_data: Dictionary) -> void:
 	for coord in active_coords:
 		var i = int(coord[0])
 		var j = int(coord[1])
-		get_or_create_hex(Vector2i(i, j))
+		var terrain = "grass"
+		if coord.size() > 2:
+			terrain = str(coord[2])
+		var hex = get_or_create_hex(Vector2i(i, j))
+		hex.set_terrain_type(terrain)
 
 	var saved_units = map_data.get("units", [])
 	for unit_data in saved_units:
@@ -314,11 +333,15 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 
 # Tool Mode Selection
 func _on_tool_brush_pressed() -> void:
-	current_tool = "BRUSH"
-	reset_tool_button_styles()
-	btn_tool_brush.set_modulate(Color(1, 1, 0.4, 1))
-	size_container.visible = true
-	units_container.visible = false
+	if current_tool == "BRUSH":
+		terrain_menu.visible = not terrain_menu.visible
+	else:
+		current_tool = "BRUSH"
+		reset_tool_button_styles()
+		btn_tool_brush.set_modulate(Color(1, 1, 0.4, 1))
+		size_container.visible = true
+		units_container.visible = false
+		terrain_menu.visible = true
 
 func _on_tool_eraser_pressed() -> void:
 	current_tool = "ERASER"
@@ -326,6 +349,8 @@ func _on_tool_eraser_pressed() -> void:
 	btn_tool_eraser.set_modulate(Color(1, 1, 0.4, 1))
 	size_container.visible = true
 	units_container.visible = false
+	if terrain_menu:
+		terrain_menu.visible = false
 
 func _on_tool_units_pressed() -> void:
 	current_tool = "UNITS"
@@ -333,6 +358,39 @@ func _on_tool_units_pressed() -> void:
 	btn_tool_units.set_modulate(Color(1, 1, 0.4, 1))
 	size_container.visible = false
 	units_container.visible = true
+	if terrain_menu:
+		terrain_menu.visible = false
+
+# Terrain Selection Handlers
+func _on_terrain_grass_pressed() -> void:
+	selected_terrain = "grass"
+	update_terrain_menu_ui()
+
+func _on_terrain_mountain_pressed() -> void:
+	selected_terrain = "mountain"
+	update_terrain_menu_ui()
+
+func _on_terrain_water_pressed() -> void:
+	selected_terrain = "water"
+	update_terrain_menu_ui()
+
+func _on_terrain_swamp_pressed() -> void:
+	selected_terrain = "swamp"
+	update_terrain_menu_ui()
+
+func update_terrain_menu_ui() -> void:
+	if btn_terrain_grass: btn_terrain_grass.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "grass" else Color(1, 1, 1, 1))
+	if btn_terrain_mountain: btn_terrain_mountain.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "mountain" else Color(1, 1, 1, 1))
+	if btn_terrain_water: btn_terrain_water.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "water" else Color(1, 1, 1, 1))
+	if btn_terrain_swamp: btn_terrain_swamp.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "swamp" else Color(1, 1, 1, 1))
+	
+	var icon = "🌿"
+	match selected_terrain:
+		"mountain": icon = "⛰️"
+		"water": icon = "💧"
+		"swamp": icon = "🐊"
+	if btn_tool_brush:
+		btn_tool_brush.text = "🖌️" + icon
 
 func reset_tool_button_styles() -> void:
 	btn_tool_brush.set_modulate(Color(1, 1, 1, 1))
@@ -406,7 +464,8 @@ func apply_tool_at_coord(center_coord: Vector2i) -> void:
 	if current_tool == "BRUSH":
 		var r = 0 if current_brush_size == 1 else (1 if current_brush_size == 2 else 2)
 		for c in get_coords_in_radius(center_coord, r):
-			get_or_create_hex(c)
+			var hex = get_or_create_hex(c)
+			hex.set_terrain_type(selected_terrain)
 
 	elif current_tool == "ERASER":
 		var r = 0 if current_brush_size == 1 else (1 if current_brush_size == 2 else 2)
@@ -457,7 +516,11 @@ func _on_save_map_pressed() -> void:
 	
 	var active_list: Array = []
 	for c in coords:
-		active_list.append([c.x - min_i, c.y - min_j])
+		var hex = active_hexes[c]
+		var terrain = "grass"
+		if hex and "terrain_type" in hex:
+			terrain = hex.terrain_type
+		active_list.append([c.x - min_i, c.y - min_j, terrain])
 		
 	var units_data: Array = []
 	for c in coords:

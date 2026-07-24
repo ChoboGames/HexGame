@@ -237,6 +237,57 @@ tooltip_text = "Zergling"
 theme_override_font_sizes/font_size = 18
 text = "👾"
 
+[node name="TerrainMenu" type="PanelContainer" parent="CanvasLayerUI"]
+visible = false
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -120.0
+offset_right = 360.0
+offset_bottom = -60.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/TerrainMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/TerrainMenu/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnTerrainGrass" type="Button" parent="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 42)
+layout_mode = 2
+tooltip_text = "Pasto (Grass)"
+theme_override_font_sizes/font_size = 14
+text = "🌿 Pasto"
+
+[node name="BtnTerrainMountain" type="Button" parent="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 42)
+layout_mode = 2
+tooltip_text = "Montaña (Mountain)"
+theme_override_font_sizes/font_size = 14
+text = "⛰️ Montaña"
+
+[node name="BtnTerrainWater" type="Button" parent="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 42)
+layout_mode = 2
+tooltip_text = "Agua (Water)"
+theme_override_font_sizes/font_size = 14
+text = "💧 Agua"
+
+[node name="BtnTerrainSwamp" type="Button" parent="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 42)
+layout_mode = 2
+tooltip_text = "Pantano (Swamp)"
+theme_override_font_sizes/font_size = 14
+text = "🐊 Pantano"
+
 [node name="DimOverlay" type="ColorRect" parent="CanvasLayerUI"]
 visible = false
 anchors_preset = 15
@@ -326,3 +377,8 @@ text = "❌ Cancelar"
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling" to="." method="_on_unit_zergling_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainGrass" to="." method="_on_terrain_grass_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainMountain" to="." method="_on_terrain_mountain_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainWater" to="." method="_on_terrain_water_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainSwamp" to="." method="_on_terrain_swamp_pressed"]
+
