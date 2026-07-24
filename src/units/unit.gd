@@ -57,10 +57,18 @@ func set_hex(hex):
 	hex.unit = self
 	position_in_hex()
 
+signal unit_died(unit: Node2D)
+
+func is_king() -> bool:
+	if stats and stats.unit_name.to_lower() == "king":
+		return true
+	return unit_letter == "K"
+
 func set_hp(new_hp):
 	if new_hp <= 0:
 		if hex:
 			hex.unit = null
+		unit_died.emit(self)
 		queue_free()
 		return
 	hp = new_hp
