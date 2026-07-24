@@ -6,7 +6,7 @@
 script = ExtResource("1_unitstats")
 unit_name = "King"
 unit_letter = "K"
-base_hp = 24
+base_hp = 10
 damage = 3
 movement = 2
 range = 1

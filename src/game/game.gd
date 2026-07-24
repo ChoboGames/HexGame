@@ -131,13 +131,30 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	unit_scene.unit_died.connect(_on_unit_died)
 	add_child(unit_scene)
 
+func get_units_for_player(player_idx: int) -> Array:
+	var list = []
+	for i in range(height):
+		for j in range(width):
+			if grid[i][j] and grid[i][j].unit and not grid[i][j].unit.is_queued_for_deletion():
+				if grid[i][j].unit.player_index == player_idx:
+					list.append(grid[i][j].unit)
+	return list
+
 func _on_unit_died(unit) -> void:
 	if is_game_over:
 		return
-	if unit and unit.is_king():
+	if not unit:
+		return
+		
+	var victim_player = unit.player_index
+	var winner_player = 1 - victim_player
+	
+	var remaining_units = get_units_for_player(victim_player)
+	remaining_units.erase(unit)
+	
+	if unit.is_king() or remaining_units.is_empty():
 		is_game_over = true
 		clear_selection()
-		var winner_player = 1 - unit.player_index
 		if victory_message:
 			victory_message.text = "¡El Jugador " + str(winner_player) + " ha ganado!"
 		if victory_panel:
