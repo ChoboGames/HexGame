@@ -29,7 +29,7 @@ func color_hexagon_attack(hex, range=0):
 
 		var distance = distance_objects[destination_hex]
 		var player_index = hex.unit.player_index
-		if distance > 0 and range > 0 and distance <= range and destination_hex.unit:
+		if distance > 0 and range > 0 and distance <= range and destination_hex.unit and destination_hex.unit.player_index != player_index:
 			destination_hex.set_modulate(Color(1, 0, 0, 1))
 			new_distance_objects.append(distance_object)
 
