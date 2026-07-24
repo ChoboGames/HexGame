@@ -28,4 +28,5 @@ offset_right = 360.0
 offset_bottom = 356.0
 texture_normal = ExtResource("2_ptyua")
 
+[connection signal="mouse_entered" from="TextureButton" to="." method="_on_texture_button_mouse_entered"]
 [connection signal="pressed" from="TextureButton" to="." method="_on_texture_button_pressed"]

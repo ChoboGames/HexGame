@@ -2,144 +2,282 @@ extends Node2D
 
 class_name MapEditor
 
-# Parámetros estáticos para lanzar la escena desde el Menú Principal
 static var selected_map_path: String = ""
-static var launch_mode: String = "EDITOR" # "EDITOR" o "GAME"
 
-@export var width = 6
-@export var height = 6
+@onready var grid_overlay = $GridOverlay
 
-@onready var unit_selector = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitSelector
-@onready var player_selector = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/PlayerSelector
 @onready var save_name_input = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/MapNameInput
 @onready var save_status_label = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/StatusLabel
-@onready var btn_mode_terrain = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeTerrain
-@onready var btn_mode_units = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnModeUnits
+@onready var label_dimensions = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/LabelDimensions
 
 @onready var top_bar = $CanvasLayerUI/TopBar
 @onready var editor_toolbar = $CanvasLayerUI/EditorToolBar
-@onready var game_hud = $CanvasLayerUI/GameHUD
-@onready var turn_label = $CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/Turn
+
+@onready var btn_undo = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnUndo
+@onready var btn_redo = $CanvasLayerUI/TopBar/MarginContainer/HBoxContainer/BtnRedo
+
+@onready var btn_tool_brush = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolBrush
+@onready var btn_tool_eraser = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolEraser
+@onready var btn_tool_units = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/BtnToolUnits
+
+@onready var size_container = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer
+@onready var btn_size_1 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize1
+@onready var btn_size_2 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize2
+@onready var btn_size_3 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/SizeContainer/BtnSize3
+
+@onready var units_container = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer
+@onready var btn_player_1 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer1
+@onready var btn_player_2 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer2
+@onready var btn_unit_king = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitKing
+@onready var btn_unit_marine = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine
+@onready var btn_unit_zealot = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot
+@onready var btn_unit_zergling = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling
 
 @onready var dim_overlay = $CanvasLayerUI/DimOverlay
 @onready var load_map_panel = $CanvasLayerUI/LoadMapPanel
 @onready var map_load_option_button = $CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/MapLoadOptionButton
 
-var turn = 0
-var distance_objects = {}
-var attack_objects = []
-var old_hex = null
+var current_tool: String = "BRUSH" # "BRUSH", "ERASER", "UNITS"
+var current_brush_size: int = 1 # 1, 2, 3
+var selected_unit_type: String = "marine"
+var selected_player_index: int = 0
 
-var game_started = false
-var current_tool: String = "TERRAIN" # "TERRAIN" o "UNITS"
-
-var grid = []
+var is_left_clicking: bool = false
+var active_hexes: Dictionary = {} # Vector2i(i, j) -> Hex Node2D
 var available_editor_maps: Array = []
 
-func print_grid():
-	for i in range(height):
-		print(grid[i])
+var undo_stack: Array = []
+var redo_stack: Array = []
+const MAX_UNDO_HISTORY: int = 50
 
-func reset_colors():
-	for i in range(height):
-		for j in range(width):
-			if grid[i][j] and grid[i][j].activated:
-				grid[i][j].set_modulate(Color(1, 1, 1, 1))
-
-func clear_selection():
-	old_hex = null
-	distance_objects = {}
-	attack_objects = []
-	reset_colors()
-
-func show_available_actions(hex):
-	var unit = hex.unit
-	reset_colors()
-	if unit.movement_used < unit.movement:
-		distance_objects = $Dijkstra.color_hexagons(hex, unit.movement - unit.movement_used)
-	else:
-		distance_objects = {}
-	if not unit.has_attacked:
-		attack_objects = $Dijkstra.color_hexagon_attack(hex, unit.range)
-	else:
-		attack_objects = []
-
-func _ready():
+func _ready() -> void:
 	dim_overlay.visible = false
 	load_map_panel.visible = false
-	grid = []
+	active_hexes.clear()
+	undo_stack.clear()
+	redo_stack.clear()
 	
-	# Cargar datos de mapa si se especificó una ruta
 	var map_data: Dictionary = {}
 	if not selected_map_path.is_empty():
 		map_data = MapSerializer.load_map(selected_map_path)
-		if not map_data.is_empty():
-			width = map_data.get("width", 6)
-			height = map_data.get("height", 6)
-			if save_name_input and map_data.has("name"):
-				save_name_input.text = map_data.get("name")
+		if not map_data.is_empty() and save_name_input and map_data.has("name"):
+			save_name_input.text = map_data.get("name")
 	
-	# Construir la rejilla de hexágonos
-	for i in range(height):
-		grid.insert(i, [])
-		for j in range(width):
-			var hex = load("res://src/hex/hex.tscn").instantiate()
-			hex.name = str(i) + "," + str(j)
-			hex.i = i
-			hex.j = j
-			hex.connect("hex_pressed", on_hex_pressed)
-			var x = j * 720  + i * 720
-			var y = -j * 720 + i * 720
-			x *= 4.5 / 6
-			y /= 2
-			hex.position = Vector2(x, y)
-			add_child(hex)
-			grid[i].insert(j, hex)
-
-	do_connections()
-	
-	# Aplicar el mapa cargado o inicializar por defecto
 	if not map_data.is_empty():
 		apply_map_data(map_data)
-	else:
-		# Por defecto, todos los hexágonos activados
-		for i in range(height):
-			for j in range(width):
-				grid[i][j].activated = true
-				grid[i][j].visible = true
 
-	# Configurar los modos de la UI
-	if launch_mode == "GAME":
-		start_game_mode()
-	else:
-		start_editor_mode()
+	_on_tool_brush_pressed()
+	_on_size_1_pressed()
+	_on_player_1_pressed()
+	_on_unit_marine_pressed()
+	update_overlay()
+	update_undo_redo_ui()
 
-func clear_units():
-	for i in range(height):
-		for j in range(width):
-			var hex = grid[i][j]
-			if hex and hex.unit:
-				hex.unit.queue_free()
-				hex.unit = null
+func update_dimensions_label() -> void:
+	if label_dimensions:
+		label_dimensions.text = str(active_hexes.size()) + " Hexes"
 
-func apply_map_data(map_data: Dictionary):
-	clear_units()
+func update_overlay() -> void:
+	if grid_overlay:
+		grid_overlay.update_bounds_from_coords(active_hexes.keys(), active_hexes)
+	update_dimensions_label()
+
+func update_undo_redo_ui() -> void:
+	if btn_undo:
+		btn_undo.disabled = undo_stack.is_empty()
+	if btn_redo:
+		btn_redo.disabled = redo_stack.is_empty()
+
+func get_map_snapshot() -> Dictionary:
+	var active_coords: Array = []
+	var units_data: Array = []
 	
-	var active_hexes = map_data.get("active_hexes", [])
-	if active_hexes.size() > 0:
-		# Desactivar todos y activar solo los que estén en la lista guardada
-		for i in range(height):
-			for j in range(width):
-				grid[i][j].activated = false
-				grid[i][j].visible = false
+	for c in active_hexes.keys():
+		active_coords.append([c.x, c.y])
+		var hex = active_hexes[c]
+		if hex and hex.unit:
+			var unit_type = "marine"
+			if hex.unit.stats:
+				unit_type = hex.unit.stats.unit_name.to_lower()
+			elif not hex.unit.scene_file_path.is_empty():
+				unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
+			else:
+				unit_type = hex.unit.name.to_lower()
+			if unit_type == "ling":
+				unit_type = "zergling"
+			units_data.append({
+				"i": c.x,
+				"j": c.y,
+				"unit_type": unit_type,
+				"player_index": hex.unit.player_index
+			})
+	return {
+		"active_hexes": active_coords,
+		"units": units_data
+	}
+
+func record_undo_state() -> void:
+	undo_stack.append(get_map_snapshot())
+	if undo_stack.size() > MAX_UNDO_HISTORY:
+		undo_stack.pop_front()
+	redo_stack.clear()
+	update_undo_redo_ui()
+
+func undo() -> void:
+	if undo_stack.is_empty():
+		return
+	redo_stack.append(get_map_snapshot())
+	var prev_state = undo_stack.pop_back()
+	apply_map_data(prev_state)
+	update_undo_redo_ui()
+	save_status_label.text = "Deshecho (Undo)"
+
+func redo() -> void:
+	if redo_stack.is_empty():
+		return
+	undo_stack.append(get_map_snapshot())
+	var next_state = redo_stack.pop_back()
+	apply_map_data(next_state)
+	update_undo_redo_ui()
+	save_status_label.text = "Rehecho (Redo)"
+
+func is_mouse_over_ui() -> bool:
+	var mouse_pos = get_viewport().get_mouse_position()
+	if top_bar and top_bar.visible and top_bar.get_global_rect().has_point(mouse_pos):
+		return true
+	if editor_toolbar and editor_toolbar.visible and editor_toolbar.get_global_rect().has_point(mouse_pos):
+		return true
+	if load_map_panel and load_map_panel.visible and load_map_panel.get_global_rect().has_point(mouse_pos):
+		return true
+	return false
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		var is_ctrl = event.ctrl_pressed or event.command_or_control_autoremap
+		if is_ctrl and event.keycode == KEY_Z:
+			if event.shift_pressed:
+				redo()
+			else:
+				undo()
+			get_viewport().set_input_as_handled()
+			return
+		elif is_ctrl and event.keycode == KEY_Y:
+			redo()
+			get_viewport().set_input_as_handled()
+			return
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		var was_clicking = is_left_clicking
+		is_left_clicking = event.pressed
+		if is_left_clicking and not was_clicking and not is_mouse_over_ui():
+			var mouse_pos = get_global_mouse_position()
+			var coord = ShapeGenerator.world_to_hex(mouse_pos)
+			if not active_hexes.has(coord):
+				record_undo_state()
+				apply_tool_at_coord(coord)
+			
+	elif event is InputEventMouseMotion:
+		if not is_mouse_over_ui():
+			var mouse_pos = get_global_mouse_position()
+			var coord = ShapeGenerator.world_to_hex(mouse_pos)
+			if grid_overlay:
+				grid_overlay.update_hover_coord(coord)
+			if is_left_clicking and (current_tool == "BRUSH" or current_tool == "ERASER"):
+				apply_tool_at_coord(coord)
+		else:
+			if grid_overlay:
+				grid_overlay.update_hover_coord(Vector2i(999999, 999999))
+
+func get_or_create_hex(coord: Vector2i) -> Node2D:
+	if active_hexes.has(coord):
+		return active_hexes[coord]
 		
-		for coord in active_hexes:
-			var i = int(coord[0])
-			var j = int(coord[1])
-			if i >= 0 and i < height and j >= 0 and j < width:
-				grid[i][j].activated = true
-				grid[i][j].visible = true
-				grid[i][j].set_modulate(Color(1, 1, 1, 1))
+	var hex = load("res://src/hex/hex.tscn").instantiate()
+	hex.name = str(coord.x) + "," + str(coord.y)
+	hex.i = coord.x
+	hex.j = coord.y
+	hex.hex_pressed.connect(on_hex_pressed)
+	hex.hex_hovered.connect(on_hex_hovered)
+	hex.position = ShapeGenerator.hex_to_world(coord.x, coord.y)
+	hex.activated = true
+	hex.visible = true
+	hex.set_modulate(Color(1, 1, 1, 1))
+	
+	active_hexes[coord] = hex
+	add_child(hex)
+	reconnect_all_neighbors()
+	update_overlay()
+	return hex
+
+func remove_hex(coord: Vector2i) -> void:
+	if active_hexes.has(coord):
+		var hex = active_hexes[coord]
+		if hex.unit:
+			hex.unit.queue_free()
+			hex.unit = null
+		active_hexes.erase(coord)
+		hex.queue_free()
+		reconnect_all_neighbors()
+		update_overlay()
+
+func reconnect_all_neighbors() -> void:
+	for coord in active_hexes.keys():
+		var hex = active_hexes[coord]
+		hex.up_left = active_hexes.get(Vector2i(coord.x - 1, coord.y))
+		hex.up_center = active_hexes.get(Vector2i(coord.x - 1, coord.y + 1))
+		hex.up_right = active_hexes.get(Vector2i(coord.x, coord.y + 1))
+		hex.down_left = active_hexes.get(Vector2i(coord.x, coord.y - 1))
+		hex.down_center = active_hexes.get(Vector2i(coord.x + 1, coord.y - 1))
+		hex.down_right = active_hexes.get(Vector2i(coord.x + 1, coord.y))
+
+func _on_expand_canvas_pressed() -> void:
+	record_undo_state()
+	var coords = active_hexes.keys()
+	if coords.is_empty():
+		for i in range(6):
+			for j in range(6):
+				get_or_create_hex(Vector2i(i, j))
+		return
+		
+	var min_i = coords[0].x
+	var max_i = coords[0].x
+	var min_j = coords[0].y
+	var max_j = coords[0].y
+	for c in coords:
+		min_i = min(min_i, c.x)
+		max_i = max(max_i, c.x)
+		min_j = min(min_j, c.y)
+		max_j = max(max_j, c.y)
+		
+	for i in range(min_i - 1, max_i + 2):
+		for j in range(min_j - 1, max_j + 2):
+			get_or_create_hex(Vector2i(i, j))
+
+func _on_clear_canvas_pressed() -> void:
+	record_undo_state()
+	for coord in active_hexes.keys():
+		var hex = active_hexes[coord]
+		if hex.unit:
+			hex.unit.queue_free()
+		hex.queue_free()
+	active_hexes.clear()
+	update_overlay()
+
+func clear_units() -> void:
+	for coord in active_hexes.keys():
+		var hex = active_hexes[coord]
+		if hex and hex.unit:
+			hex.unit.queue_free()
+			hex.unit = null
+
+func apply_map_data(map_data: Dictionary) -> void:
+	_on_clear_canvas_pressed_internal()
+	
+	var active_coords = map_data.get("active_hexes", [])
+	for coord in active_coords:
+		var i = int(coord[0])
+		var j = int(coord[1])
+		get_or_create_hex(Vector2i(i, j))
 
 	var saved_units = map_data.get("units", [])
 	for unit_data in saved_units:
@@ -147,10 +285,19 @@ func apply_map_data(map_data: Dictionary):
 		var j = int(unit_data.get("j", 0))
 		var unit_type = str(unit_data.get("unit_type", "marine"))
 		var player_idx = int(unit_data.get("player_index", 0))
-		if i >= 0 and i < height and j >= 0 and j < width:
-			spawn_unit_at(grid[i][j], unit_type, player_idx)
+		var hex = get_or_create_hex(Vector2i(i, j))
+		spawn_unit_at(hex, unit_type, player_idx)
 
-func spawn_unit_at(hex, unit_type: String, player_idx: int):
+func _on_clear_canvas_pressed_internal() -> void:
+	for coord in active_hexes.keys():
+		var hex = active_hexes[coord]
+		if hex.unit:
+			hex.unit.queue_free()
+		hex.queue_free()
+	active_hexes.clear()
+	update_overlay()
+
+func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":
 		clean_type = "zergling"
@@ -165,207 +312,182 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int):
 	unit_scene.set_hex(hex)
 	add_child(unit_scene)
 
-func start_editor_mode():
-	game_started = false
-	top_bar.visible = true
-	editor_toolbar.visible = true
-	game_hud.visible = false
-	_on_mode_terrain_pressed()
+# Tool Mode Selection
+func _on_tool_brush_pressed() -> void:
+	current_tool = "BRUSH"
+	reset_tool_button_styles()
+	btn_tool_brush.set_modulate(Color(1, 1, 0.4, 1))
+	size_container.visible = true
+	units_container.visible = false
 
-func start_game_mode():
-	game_started = true
-	top_bar.visible = false
-	editor_toolbar.visible = false
-	game_hud.visible = true
-	
-	# Asegurar visibilidad de casillas activas y ocultar las inactivas
-	for i in range(height):
-		for j in range(width):
-			var hex = grid[i][j]
-			hex.visible = hex.activated
-			if hex.activated:
-				hex.set_modulate(Color(1, 1, 1, 1))
-	
-	# Reiniciar turno y refrescar todas las unidades para una nueva partida
-	turn = 0
-	clear_selection()
-	if turn_label:
-		turn_label.text = str(turn)
-	for i in range(height):
-		for j in range(width):
-			if grid[i][j].unit:
-				grid[i][j].unit.refresh()
+func _on_tool_eraser_pressed() -> void:
+	current_tool = "ERASER"
+	reset_tool_button_styles()
+	btn_tool_eraser.set_modulate(Color(1, 1, 0.4, 1))
+	size_container.visible = true
+	units_container.visible = false
 
-func _on_mode_terrain_pressed():
-	current_tool = "TERRAIN"
-	btn_mode_terrain.set_modulate(Color(1, 1, 0.4, 1))
-	btn_mode_units.set_modulate(Color(1, 1, 1, 1))
-	unit_selector.disabled = true
-	player_selector.disabled = true
-
-func _on_mode_units_pressed():
+func _on_tool_units_pressed() -> void:
 	current_tool = "UNITS"
-	btn_mode_terrain.set_modulate(Color(1, 1, 1, 1))
-	btn_mode_units.set_modulate(Color(1, 1, 0.4, 1))
-	unit_selector.disabled = false
-	player_selector.disabled = false
+	reset_tool_button_styles()
+	btn_tool_units.set_modulate(Color(1, 1, 0.4, 1))
+	size_container.visible = false
+	units_container.visible = true
 
-func on_hex_pressed(hex):
-	if game_started:
-		# Lógica de juego de combate por turnos
-		# Re-seleccionar el mismo hex -> deseleccionar
-		if old_hex != null and hex == old_hex:
-			clear_selection()
-			return
-		# Si hay unidad seleccionada, intentar ejecutar una acción
-		if old_hex != null:
-			var unit = old_hex.unit
-			if hex in distance_objects:
-				# Mover (costo = distancia recorrida en hexágonos)
-				var cost = distance_objects[hex]
-				old_hex.unit = null
-				unit.set_hex(hex)
-				unit.movement_used += cost
-				unit.update_action_visual()
-				old_hex = hex
-				# Selección persistente si aún puede actuar
-				if unit.movement_used < unit.movement or not unit.has_attacked:
-					show_available_actions(hex)
-				else:
-					clear_selection()
-				return
-			elif hex in attack_objects:
-				# Atacar
-				unit.attack(hex.unit)
-				unit.has_attacked = true
-				unit.update_action_visual()
-				# Selección persistente si aún puede mover
-				if unit.movement_used < unit.movement:
-					show_available_actions(old_hex)
-				else:
-					clear_selection()
-				return
-			else:
-				# Click en otro lado: limpiar selección y caer a selección
-				clear_selection()
-		# Selección: unidad del jugador actual que aún pueda actuar
-		if hex.unit and hex.unit.player_index == turn and not hex.unit.is_exhausted():
-			old_hex = hex
-			show_available_actions(hex)
-	else:
-		# Lógica del Editor de Mapas
-		if current_tool == "TERRAIN":
-			hex.activated = !hex.activated
-			hex.visible = true
-			if hex.activated:
-				hex.set_modulate(Color(1, 1, 1, 1))
-			else:
-				hex.set_modulate(Color(0.4, 0.4, 0.4, 0.4))
-		elif current_tool == "UNITS":
-			if not hex.activated:
-				hex.activated = true
-				hex.visible = true
-				hex.set_modulate(Color(1, 1, 1, 1))
-				
-			if hex.unit:
-				hex.unit.queue_free()
-				hex.unit = null
-			else:
-				var unit_name = unit_selector.get_item_text(unit_selector.selected).to_lower()
-				spawn_unit_at(hex, unit_name, player_selector.selected)
+func reset_tool_button_styles() -> void:
+	btn_tool_brush.set_modulate(Color(1, 1, 1, 1))
+	btn_tool_eraser.set_modulate(Color(1, 1, 1, 1))
+	btn_tool_units.set_modulate(Color(1, 1, 1, 1))
 
-func connect_up_left(i, j):
-	var hex = grid[i][j]
-	if i == 0: return
-	hex.up_left = grid[i - 1][j]
+# Brush Size Selection
+func _on_size_1_pressed() -> void:
+	current_brush_size = 1
+	btn_size_1.set_modulate(Color(1, 1, 0.4, 1))
+	btn_size_2.set_modulate(Color(1, 1, 1, 1))
+	btn_size_3.set_modulate(Color(1, 1, 1, 1))
 
-func connect_up_center(i, j):
-	var hex = grid[i][j]
-	if i == 0 or j == width - 1: return
-	hex.up_center = grid[i - 1][j + 1]
+func _on_size_2_pressed() -> void:
+	current_brush_size = 2
+	btn_size_1.set_modulate(Color(1, 1, 1, 1))
+	btn_size_2.set_modulate(Color(1, 1, 0.4, 1))
+	btn_size_3.set_modulate(Color(1, 1, 1, 1))
 
-func connect_up_right(i, j):
-	var hex = grid[i][j]
-	if j == width - 1: return
-	hex.up_right = grid[i][j + 1]
+func _on_size_3_pressed() -> void:
+	current_brush_size = 3
+	btn_size_1.set_modulate(Color(1, 1, 1, 1))
+	btn_size_2.set_modulate(Color(1, 1, 1, 1))
+	btn_size_3.set_modulate(Color(1, 1, 0.4, 1))
 
-func connect_down_left(i, j):
-	var hex = grid[i][j]
-	if j == 0: return
-	hex.down_left = grid[i][j - 1]
+# Player Selection
+func _on_player_1_pressed() -> void:
+	selected_player_index = 0
+	btn_player_1.set_modulate(Color(1, 1, 0.4, 1))
+	btn_player_2.set_modulate(Color(1, 1, 1, 1))
 
-func connect_down_center(i, j):
-	var hex = grid[i][j]
-	if j == 0 or i == height - 1: return
-	hex.down_center = grid[i + 1][j - 1]
+func _on_player_2_pressed() -> void:
+	selected_player_index = 1
+	btn_player_1.set_modulate(Color(1, 1, 1, 1))
+	btn_player_2.set_modulate(Color(1, 1, 0.4, 1))
 
-func connect_down_right(i, j):
-	var hex = grid[i][j]
-	if i == height - 1: return
-	hex.down_right = grid[i + 1][j]
+# Unit Selection
+func _on_unit_king_pressed() -> void:
+	selected_unit_type = "king"
+	highlight_unit_button(btn_unit_king)
 
-func do_connections():
-	for i in range(height):
-		for j in range(width):
-			connect_up_left(i, j)
-			connect_up_center(i, j)
-			connect_up_right(i, j)
-			connect_down_left(i, j)
-			connect_down_center(i, j)
-			connect_down_right(i, j)
+func _on_unit_marine_pressed() -> void:
+	selected_unit_type = "marine"
+	highlight_unit_button(btn_unit_marine)
 
-func _on_finish_turn_pressed():
-	clear_selection()
-	turn = int(!turn)
-	if turn_label:
-		turn_label.text = str(turn)
-	# Refrescar todas las unidades al cambiar de turno
-	for i in range(height):
-		for j in range(width):
-			if grid[i][j].unit:
-				grid[i][j].unit.refresh()
+func _on_unit_zealot_pressed() -> void:
+	selected_unit_type = "zealot"
+	highlight_unit_button(btn_unit_zealot)
 
-func _on_save_map_pressed():
+func _on_unit_zergling_pressed() -> void:
+	selected_unit_type = "zergling"
+	highlight_unit_button(btn_unit_zergling)
+
+func highlight_unit_button(target_btn) -> void:
+	btn_unit_king.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_marine.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_zealot.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_zergling.set_modulate(Color(1, 1, 1, 1))
+	target_btn.set_modulate(Color(1, 1, 0.4, 1))
+
+func get_coords_in_radius(center: Vector2i, radius: int) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var max_range = radius + 2
+	for i in range(center.x - max_range, center.x + max_range + 1):
+		for j in range(center.y - max_range, center.y + max_range + 1):
+			if ShapeGenerator.hex_distance(center.x, center.y, i, j) <= radius:
+				result.append(Vector2i(i, j))
+	return result
+
+func apply_tool_at_coord(center_coord: Vector2i) -> void:
+	if current_tool == "BRUSH":
+		var r = 0 if current_brush_size == 1 else (1 if current_brush_size == 2 else 2)
+		for c in get_coords_in_radius(center_coord, r):
+			get_or_create_hex(c)
+
+	elif current_tool == "ERASER":
+		var r = 0 if current_brush_size == 1 else (1 if current_brush_size == 2 else 2)
+		for c in get_coords_in_radius(center_coord, r):
+			remove_hex(c)
+
+	elif current_tool == "UNITS":
+		var hex = get_or_create_hex(center_coord)
+		if hex.unit:
+			hex.unit.queue_free()
+			hex.unit = null
+		else:
+			spawn_unit_at(hex, selected_unit_type, selected_player_index)
+
+func on_hex_pressed(hex) -> void:
+	if hex and not is_mouse_over_ui():
+		record_undo_state()
+		apply_tool_at_coord(Vector2i(hex.i, hex.j))
+
+func on_hex_hovered(hex) -> void:
+	if hex and is_left_clicking and not is_mouse_over_ui():
+		if current_tool == "BRUSH" or current_tool == "ERASER":
+			apply_tool_at_coord(Vector2i(hex.i, hex.j))
+
+func _on_save_map_pressed() -> void:
 	var map_name = save_name_input.text.strip_edges()
 	if map_name.is_empty():
 		map_name = "MiMapa"
 	
-	var active_hexes: Array = []
-	for i in range(height):
-		for j in range(width):
-			if grid[i][j].activated:
-				active_hexes.append([i, j])
+	var coords = active_hexes.keys()
+	if coords.is_empty():
+		save_status_label.text = "¡El mapa está vacío!"
+		return
+		
+	var min_i = coords[0].x
+	var max_i = coords[0].x
+	var min_j = coords[0].y
+	var max_j = coords[0].y
 	
+	for c in coords:
+		min_i = min(min_i, c.x)
+		max_i = max(max_i, c.x)
+		min_j = min(min_j, c.y)
+		max_j = max(max_j, c.y)
+		
+	var width_val = max_j - min_j + 1
+	var height_val = max_i - min_i + 1
+	
+	var active_list: Array = []
+	for c in coords:
+		active_list.append([c.x - min_i, c.y - min_j])
+		
 	var units_data: Array = []
-	for i in range(height):
-		for j in range(width):
-			var hex = grid[i][j]
-			if hex.unit:
-				var unit_type = "marine"
-				if hex.unit.stats:
-					unit_type = hex.unit.stats.unit_name.to_lower()
-				elif not hex.unit.scene_file_path.is_empty():
-					unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
-				else:
-					unit_type = hex.unit.name.to_lower()
+	for c in coords:
+		var hex = active_hexes[c]
+		if hex and hex.unit:
+			var unit_type = "marine"
+			if hex.unit.stats:
+				unit_type = hex.unit.stats.unit_name.to_lower()
+			elif not hex.unit.scene_file_path.is_empty():
+				unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
+			else:
+				unit_type = hex.unit.name.to_lower()
+			
+			if unit_type == "ling":
+				unit_type = "zergling"
 				
-				if unit_type == "ling":
-					unit_type = "zergling"
-					
-				units_data.append({
-					"i": i,
-					"j": j,
-					"unit_type": unit_type,
-					"player_index": hex.unit.player_index
-				})
+			units_data.append({
+				"i": c.x - min_i,
+				"j": c.y - min_j,
+				"unit_type": unit_type,
+				"player_index": hex.unit.player_index
+			})
 	
-	var saved_path = MapSerializer.save_map(map_name, width, height, active_hexes, units_data)
+	var saved_path = MapSerializer.save_map(map_name, width_val, height_val, active_list, units_data)
 	if not saved_path.is_empty():
 		save_status_label.text = "¡Mapa guardado exitosamente!"
 	else:
 		save_status_label.text = "Error al guardar mapa."
 
-func _on_load_map_pressed():
+func _on_load_map_pressed() -> void:
 	map_load_option_button.clear()
 	available_editor_maps = MapSerializer.list_maps()
 	if available_editor_maps.is_empty():
@@ -378,7 +500,7 @@ func _on_load_map_pressed():
 	dim_overlay.visible = true
 	load_map_panel.visible = true
 
-func _on_confirm_load_pressed():
+func _on_confirm_load_pressed() -> void:
 	if available_editor_maps.is_empty():
 		return
 	
@@ -387,6 +509,7 @@ func _on_confirm_load_pressed():
 		var chosen_map = available_editor_maps[selected_idx]
 		var map_data = MapSerializer.load_map(chosen_map.get("path", ""))
 		if not map_data.is_empty():
+			record_undo_state()
 			apply_map_data(map_data)
 			if map_data.has("name"):
 				save_name_input.text = map_data.get("name")
@@ -395,9 +518,15 @@ func _on_confirm_load_pressed():
 	dim_overlay.visible = false
 	load_map_panel.visible = false
 
-func _on_cancel_load_pressed():
+func _on_cancel_load_pressed() -> void:
 	dim_overlay.visible = false
 	load_map_panel.visible = false
 
-func _on_back_to_menu_pressed():
+func _on_undo_pressed() -> void:
+	undo()
+
+func _on_redo_pressed() -> void:
+	redo()
+
+func _on_back_to_menu_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/ui/main_menu.tscn")

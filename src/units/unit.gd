@@ -49,6 +49,7 @@ func apply_stats():
 	set_hp(base_hp if base_hp > 0 else 10)
 
 func _ready():
+	z_index = 10
 	apply_stats()
 	set_player_index(player_index)
 
