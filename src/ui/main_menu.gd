@@ -26,7 +26,6 @@ func refresh_map_list():
 
 func _on_editor_button_pressed():
 	MapEditor.selected_map_path = ""
-	MapEditor.launch_mode = "EDITOR"
 	get_tree().change_scene_to_file("res://src/map_editor/map_editor.tscn")
 
 func _on_play_button_pressed():
@@ -41,9 +40,8 @@ func _on_confirm_play_pressed():
 	var selected_idx = map_option_button.selected
 	if selected_idx >= 0 and selected_idx < maps_data.size():
 		var chosen_map = maps_data[selected_idx]
-		MapEditor.selected_map_path = chosen_map.get("path", "")
-		MapEditor.launch_mode = "GAME"
-		get_tree().change_scene_to_file("res://src/map_editor/map_editor.tscn")
+		Game.selected_map_path = chosen_map.get("path", "")
+		get_tree().change_scene_to_file("res://src/game/game.tscn")
 
 func _on_cancel_play_pressed():
 	dim_overlay.visible = false
