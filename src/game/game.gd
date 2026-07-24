@@ -21,6 +21,9 @@ var is_game_over: bool = false
 func _ready() -> void:
 	grid = []
 	
+	if selected_map_path.is_empty():
+		selected_map_path = "res://maps/default_map.json"
+		
 	var map_data: Dictionary = {}
 	if not selected_map_path.is_empty():
 		map_data = MapSerializer.load_map(selected_map_path)

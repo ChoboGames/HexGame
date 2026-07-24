@@ -61,6 +61,19 @@ class PriorityQueue:
 		# Clear the queue
 		queue.clear()
 
+func get_terrain_cost(hex: Node2D, count_everything: bool = false) -> int:
+	if not hex or not hex.visible:
+		return -1
+	var terrain = "grass"
+	if "terrain_type" in hex:
+		terrain = hex.terrain_type
+	match terrain:
+		"grass": return 1
+		"swamp": return 2
+		"mountain": return 3
+		"water": return -1 if not count_everything else 1
+		_: return 1
+
 # Dijkstra's algorithm function
 func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictionary:
 	# Initialize distances to all hexagons as infinity
@@ -80,8 +93,10 @@ func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictio
 		
 		# Visit neighboring hexagons
 		for neighbor in get_neighbors(current_hexagon):
-			# Calculate tentative distance through current hexagon
-			var tentative_distance = current_distance + 1  # Assuming uniform distance between hexagons
+			var cost = get_terrain_cost(neighbor, count_everything)
+			if cost < 0:
+				continue
+			var tentative_distance = current_distance + cost
 			
 			# Update distance if shorter path found
 			if not distances.has(neighbor) or tentative_distance < distances[neighbor]:
