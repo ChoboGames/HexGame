@@ -67,12 +67,13 @@ func get_terrain_cost(hex: Node2D, count_everything: bool = false) -> int:
 	var terrain = "grass"
 	if "terrain_type" in hex:
 		terrain = hex.terrain_type
-	match terrain:
-		"grass": return 1
-		"swamp": return 2
-		"mountain": return 3
-		"water": return -1 if not count_everything else 1
-		_: return 1
+	if terrain == "mountain":
+		return -1
+	if count_everything:
+		return 1
+	if terrain == "water":
+		return -1
+	return 1
 
 # Dijkstra's algorithm function
 func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictionary:
@@ -90,6 +91,9 @@ func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictio
 		var hex_vector = pq.pop_front()
 		var current_distance = hex_vector[0]
 		var current_hexagon = hex_vector[1]
+		if current_hexagon != start_hexagon and not count_everything \
+				and "terrain_type" in current_hexagon and current_hexagon.terrain_type == "swamp":
+			continue
 		
 		# Visit neighboring hexagons
 		for neighbor in get_neighbors(current_hexagon):

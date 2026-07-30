@@ -123,6 +123,8 @@ func apply_map_data(map_data: Dictionary) -> void:
 			spawn_unit_at(grid[i][j], unit_type, player_idx)
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
+	if hex and "terrain_type" in hex and hex.terrain_type == "mountain":
+		return
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":
 		clean_type = "zergling"
@@ -181,7 +183,10 @@ func on_hex_pressed(hex) -> void:
 			var cost = distance_objects[hex]
 			old_hex.unit = null
 			unit.set_hex(hex)
-			unit.movement_used += cost
+			if "terrain_type" in hex and hex.terrain_type == "swamp":
+				unit.movement_used = unit.movement
+			else:
+				unit.movement_used += cost
 			unit.update_action_visual()
 			old_hex = hex
 			if unit.movement_used < unit.movement or not unit.has_attacked:
