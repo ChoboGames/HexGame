@@ -317,7 +317,7 @@ func _on_clear_canvas_pressed_internal() -> void:
 	update_overlay()
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
-	if hex and "terrain_type" in hex and hex.terrain_type == "mountain":
+	if hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
 		return
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":

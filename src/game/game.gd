@@ -71,15 +71,41 @@ func clear_selection() -> void:
 	attack_objects = []
 	reset_colors()
 
+func highlight_movement_range(hex, range_val: int = 0) -> Dictionary:
+	hex.set_modulate(Color(0.5, 1, 0.5, 1))
+	var distance_objects = $Dijkstra.dijkstra_hexagonal(hex, false)
+	var reachable = {}
+	for destination_hex in distance_objects:
+		if not destination_hex.visible or destination_hex.unit:
+			continue
+		var distance = distance_objects[destination_hex]
+		var player_index = hex.unit.player_index
+		if distance > 0 and range_val > 0 and distance <= range_val:
+			destination_hex.set_modulate(Color(1 * player_index, 0.7, 1 * (1 - player_index), 1))
+			reachable[destination_hex] = distance
+	return reachable
+
+func highlight_attack_range(hex, range_val: int = 0) -> Array:
+	hex.set_modulate(Color(0.5, 1, 0.5, 1))
+	var distance_objects = $Dijkstra.dijkstra_hexagonal(hex, true)
+	var attackable = []
+	for destination_hex in distance_objects:
+		var distance = distance_objects[destination_hex]
+		var player_index = hex.unit.player_index
+		if distance > 0 and range_val > 0 and distance <= range_val and destination_hex.unit and destination_hex.unit.player_index != player_index:
+			destination_hex.set_modulate(Color(1, 0, 0, 1))
+			attackable.append(destination_hex)
+	return attackable
+
 func show_available_actions(hex) -> void:
 	var unit = hex.unit
 	reset_colors()
 	if unit.movement_used < unit.movement:
-		distance_objects = $Dijkstra.color_hexagons(hex, unit.movement - unit.movement_used)
+		distance_objects = highlight_movement_range(hex, unit.movement - unit.movement_used)
 	else:
 		distance_objects = {}
 	if not unit.has_attacked:
-		attack_objects = $Dijkstra.color_hexagon_attack(hex, unit.range)
+		attack_objects = highlight_attack_range(hex, unit.range)
 	else:
 		attack_objects = []
 
@@ -123,7 +149,7 @@ func apply_map_data(map_data: Dictionary) -> void:
 			spawn_unit_at(grid[i][j], unit_type, player_idx)
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
-	if hex and "terrain_type" in hex and hex.terrain_type == "mountain":
+	if hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
 		return
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":
@@ -183,7 +209,7 @@ func on_hex_pressed(hex) -> void:
 			var cost = distance_objects[hex]
 			old_hex.unit = null
 			unit.set_hex(hex)
-			if "terrain_type" in hex and hex.terrain_type == "swamp":
+			if hex.has_method("stops_movement_on_enter") and hex.stops_movement_on_enter():
 				unit.movement_used = unit.movement
 			else:
 				unit.movement_used += cost

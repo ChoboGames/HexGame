@@ -39,6 +39,40 @@ func set_terrain_type(new_type: String) -> void:
 	if texture:
 		button.texture_normal = texture
 
+func is_walkable() -> bool:
+	return terrain_type != "mountain" and terrain_type != "water"
+
+func is_attack_passable() -> bool:
+	return terrain_type != "mountain"
+
+func can_spawn_unit() -> bool:
+	return terrain_type != "mountain"
+
+func get_movement_cost() -> int:
+	if not is_walkable():
+		return -1
+	return 1
+
+func stops_movement_on_enter() -> bool:
+	return terrain_type == "swamp"
+
+func get_cost(is_attack: bool = false) -> int:
+	if not visible:
+		return -1
+	if is_attack:
+		return 1 if is_attack_passable() else -1
+	return get_movement_cost()
+
+func get_neighbors() -> Array:
+	var list := []
+	if up_left: list.append(up_left)
+	if up_center: list.append(up_center)
+	if up_right: list.append(up_right)
+	if down_left: list.append(down_left)
+	if down_center: list.append(down_center)
+	if down_right: list.append(down_right)
+	return list
+
 static func _get_variant_paths(terrain: String) -> Array:
 	if _variants_cache.has(terrain):
 		return _variants_cache[terrain]
