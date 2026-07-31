@@ -65,6 +65,36 @@ func is_king() -> bool:
 		return true
 	return unit_letter == "K"
 
+func is_flying() -> bool:
+	return stats != null and stats.is_flying
+
+func can_enter_hex(target_hex: Node2D) -> bool:
+	if not target_hex or not target_hex.visible:
+		return false
+	if is_flying():
+		return true
+	if target_hex.has_method("is_walkable"):
+		return target_hex.is_walkable()
+	return target_hex.terrain_type != "mountain" and target_hex.terrain_type != "water"
+
+func can_pass_through_hex(target_hex: Node2D) -> bool:
+	if not can_enter_hex(target_hex):
+		return false
+	if target_hex.unit and not is_flying():
+		return false
+	return true
+
+func stops_on_hex(target_hex: Node2D) -> bool:
+	if is_flying():
+		return false
+	if target_hex.has_method("stops_movement_on_enter"):
+		return target_hex.stops_movement_on_enter()
+	return target_hex.terrain_type == "swamp"
+
+func get_hex_cost(target_hex: Node2D) -> int:
+	return 1 if can_enter_hex(target_hex) else -1
+
+
 func set_hp(new_hp):
 	if new_hp <= 0:
 		if hex:

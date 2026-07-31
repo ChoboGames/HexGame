@@ -32,6 +32,8 @@ static var selected_map_path: String = ""
 @onready var btn_unit_marine = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine
 @onready var btn_unit_zealot = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot
 @onready var btn_unit_zergling = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling
+@onready var btn_unit_scout = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitScout
+
 
 @onready var dim_overlay = $CanvasLayerUI/DimOverlay
 @onready var load_map_panel = $CanvasLayerUI/LoadMapPanel
@@ -317,8 +319,6 @@ func _on_clear_canvas_pressed_internal() -> void:
 	update_overlay()
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
-	if hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
-		return
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":
 		clean_type = "zergling"
@@ -329,9 +329,14 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	if ResourceLoader.exists(stats_path):
 		unit_scene.stats = load(stats_path)
 		
+	if not unit_scene.is_flying() and hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
+		unit_scene.queue_free()
+		return
+		
 	unit_scene.set_player_index(player_idx)
 	unit_scene.set_hex(hex)
 	add_child(unit_scene)
+
 
 # Tool Mode Selection
 func _on_tool_brush_pressed() -> void:
@@ -446,12 +451,19 @@ func _on_unit_zergling_pressed() -> void:
 	selected_unit_type = "zergling"
 	highlight_unit_button(btn_unit_zergling)
 
+func _on_unit_scout_pressed() -> void:
+	selected_unit_type = "scout"
+	highlight_unit_button(btn_unit_scout)
+
 func highlight_unit_button(target_btn) -> void:
 	btn_unit_king.set_modulate(Color(1, 1, 1, 1))
 	btn_unit_marine.set_modulate(Color(1, 1, 1, 1))
 	btn_unit_zealot.set_modulate(Color(1, 1, 1, 1))
 	btn_unit_zergling.set_modulate(Color(1, 1, 1, 1))
+	if btn_unit_scout:
+		btn_unit_scout.set_modulate(Color(1, 1, 1, 1))
 	target_btn.set_modulate(Color(1, 1, 0.4, 1))
+
 
 func get_coords_in_radius(center: Vector2i, radius: int) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []

@@ -7,3 +7,5 @@ extends Resource
 @export var damage: int = 2
 @export var movement: int = 2
 @export var range: int = 1
+@export var is_flying: bool = false
+
