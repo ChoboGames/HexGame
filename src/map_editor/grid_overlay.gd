@@ -11,13 +11,13 @@ var hovered_coord: Vector2i = Vector2i(999999, 999999)
 
 # Flat-topped hexagon 6 corners matching flat-top orientation of hexagon.png
 const HOLLOW_HEX_POINTS = [
-	Vector2(-173, -346),
-	Vector2(173, -346),
-	Vector2(346, 0),
-	Vector2(173, 346),
-	Vector2(-173, 346),
-	Vector2(-346, 0),
-	Vector2(-173, -346)
+	Vector2(-176, -304),
+	Vector2(176, -304),
+	Vector2(351, 0),
+	Vector2(176, 304),
+	Vector2(-176, 304),
+	Vector2(-351, 0),
+	Vector2(-176, -304)
 ]
 
 func update_bounds_from_coords(coords: Array, active_set: Dictionary = {}, margin: int = 2) -> void:
