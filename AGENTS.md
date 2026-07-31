@@ -22,7 +22,7 @@ Notes for OpenCode/agent sessions working in this repo.
 ## Hex grid
 - Coordinates are axial-like `(i, j)`. Each Hex stores 6 neighbors: `up_left`, `up_center`, `up_right`, `down_left`, `down_center`, `down_right`.
 - Neighbor connectivity is wired imperatively in two places — `Game.do_connections()` and `MapEditor.reconnect_all_neighbors()`. Changing neighbor semantics requires updating both.
-- Hex↔world math lives canonically in `ShapeGenerator` (`hex_to_world`, `world_to_hex`, `hex_distance`). `Game._ready()` re-implements the same formula inline (base 720, ×4.5/6, ÷2). If you change spacing/orientation, update **both** or refactor `Game` to call `ShapeGenerator`.
+- Hex↔world math lives canonically in `ShapeGenerator` (`hex_to_world`, `world_to_hex`, `hex_distance`). All geometry is derived from a single `ShapeGenerator.HEX_SIZE` constant (texture bounding box in pixels). `Game._ready()` calls `ShapeGenerator.hex_to_world()` — no duplication.
 
 ## Maps (JSON)
 - Schema: `{ "name", "width", "height", "active_hexes": [[i,j], ...], "units": [{i,j,unit_type,player_index}, ...] }`.

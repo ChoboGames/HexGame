@@ -18,7 +18,7 @@ signal hex_hovered
 var unit
 var terrain_type: String = "grass"
 
-const HEX_SIZE := 702
+
 static var _variants_cache: Dictionary = {}
 static var _hex_material: ShaderMaterial = null
 static var _hex_click_mask: BitMap = null
@@ -27,6 +27,12 @@ static var _texture_cache: Dictionary = {}
 func _ready():
 	$Label.text = name
 	set_terrain_type(terrain_type)
+	# Centrar TextureButton según ShapeGenerator.HEX_SIZE
+	var half := ShapeGenerator.HEX_SIZE / 2.0
+	$TextureButton.offset_left = -half
+	$TextureButton.offset_top = -half
+	$TextureButton.offset_right = half
+	$TextureButton.offset_bottom = half
 
 func set_terrain_type(new_type: String) -> void:
 	terrain_type = new_type
@@ -75,9 +81,9 @@ static func _get_scaled_texture(path: String) -> Texture2D:
 	var tex = load(path)
 	if tex and tex.get_image():
 		var img = tex.get_image()
-		if img.get_width() != HEX_SIZE or img.get_height() != HEX_SIZE:
+		if img.get_width() != ShapeGenerator.HEX_SIZE or img.get_height() != ShapeGenerator.HEX_SIZE:
 			img = img.duplicate()
-			img.resize(HEX_SIZE, HEX_SIZE)
+			img.resize(ShapeGenerator.HEX_SIZE, ShapeGenerator.HEX_SIZE)
 		var out = ImageTexture.create_from_image(img)
 		_texture_cache[path] = out
 		return out

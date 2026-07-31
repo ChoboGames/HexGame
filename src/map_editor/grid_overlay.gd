@@ -9,16 +9,8 @@ var max_j: int = 8
 var active_coords_set: Dictionary = {}
 var hovered_coord: Vector2i = Vector2i(999999, 999999)
 
-# Flat-topped hexagon 6 corners matching flat-top orientation of hexagon.png
-const HOLLOW_HEX_POINTS = [
-	Vector2(-176, -304),
-	Vector2(176, -304),
-	Vector2(351, 0),
-	Vector2(176, 304),
-	Vector2(-176, 304),
-	Vector2(-351, 0),
-	Vector2(-176, -304)
-]
+# Polígono de hexágono flat-top — derivado de ShapeGenerator.HEX_SIZE
+# (ver ShapeGenerator.HEX_POINTS)
 
 func update_bounds_from_coords(coords: Array, active_set: Dictionary = {}, margin: int = 2) -> void:
 	active_coords_set = active_set
@@ -65,7 +57,7 @@ func _draw() -> void:
 			var coord = Vector2i(i, j)
 			var center = ShapeGenerator.hex_to_world(i, j)
 			var poly_points = PackedVector2Array()
-			for pt in HOLLOW_HEX_POINTS:
+			for pt in ShapeGenerator.HEX_POINTS:
 				poly_points.append(center + pt)
 			
 			var is_hovered = (coord == hovered_coord)
@@ -84,7 +76,7 @@ func _draw() -> void:
 		if not inside_loop:
 			var center = ShapeGenerator.hex_to_world(hovered_coord.x, hovered_coord.y)
 			var poly_points = PackedVector2Array()
-			for pt in HOLLOW_HEX_POINTS:
+			for pt in ShapeGenerator.HEX_POINTS:
 				poly_points.append(center + pt)
 			
 			var is_active = active_coords_set.has(hovered_coord)
