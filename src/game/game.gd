@@ -40,11 +40,7 @@ func _ready() -> void:
 			hex.i = i
 			hex.j = j
 			hex.connect("hex_pressed", on_hex_pressed)
-			var x = j * 720  + i * 720
-			var y = -j * 720 + i * 720
-			x *= 4.5 / 6
-			y /= 2
-			hex.position = Vector2(x, y)
+			hex.position = ShapeGenerator.hex_to_world(i, j)
 			add_child(hex)
 			grid[i].insert(j, hex)
 
