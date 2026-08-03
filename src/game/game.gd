@@ -145,8 +145,6 @@ func apply_map_data(map_data: Dictionary) -> void:
 			spawn_unit_at(grid[i][j], unit_type, player_idx)
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
-	if hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
-		return
 	var clean_type = unit_type.to_lower()
 	if clean_type == "ling":
 		clean_type = "zergling"
@@ -157,10 +155,15 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	if ResourceLoader.exists(stats_path):
 		unit_scene.stats = load(stats_path)
 		
+	if not unit_scene.is_flying() and hex and hex.has_method("can_spawn_unit") and not hex.can_spawn_unit():
+		unit_scene.queue_free()
+		return
+		
 	unit_scene.set_player_index(player_idx)
 	unit_scene.set_hex(hex)
 	unit_scene.unit_died.connect(_on_unit_died)
 	add_child(unit_scene)
+
 
 func get_units_for_player(player_idx: int) -> Array:
 	var list = []
@@ -205,10 +208,13 @@ func on_hex_pressed(hex) -> void:
 			var cost = distance_objects[hex]
 			old_hex.unit = null
 			unit.set_hex(hex)
-			if hex.has_method("stops_movement_on_enter") and hex.stops_movement_on_enter():
+			if unit.has_method("stops_on_hex") and unit.stops_on_hex(hex):
+				unit.movement_used = unit.movement
+			elif hex.has_method("stops_movement_on_enter") and hex.stops_movement_on_enter():
 				unit.movement_used = unit.movement
 			else:
 				unit.movement_used += cost
+
 			unit.update_action_visual()
 			old_hex = hex
 			if unit.movement_used < unit.movement or not unit.has_attacked:

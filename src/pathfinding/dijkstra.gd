@@ -22,6 +22,7 @@ class PriorityQueue:
 
 # Dijkstra's algorithm function
 func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictionary:
+	var moving_unit = start_hexagon.unit
 	var distances = {
 		start_hexagon: 0
 	}
@@ -37,18 +38,31 @@ func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictio
 		if current_distance > distances.get(current_hexagon, INF):
 			continue
 
-		if current_hexagon != start_hexagon and not count_everything \
-				and current_hexagon.has_method("stops_movement_on_enter") \
-				and current_hexagon.stops_movement_on_enter():
+		var stops_movement = false
+		if moving_unit and moving_unit.has_method("stops_on_hex"):
+			stops_movement = moving_unit.stops_on_hex(current_hexagon)
+		elif current_hexagon.has_method("stops_movement_on_enter"):
+			stops_movement = current_hexagon.stops_movement_on_enter()
+
+		if current_hexagon != start_hexagon and not count_everything and stops_movement:
 			continue
 		
 		var neighbors = current_hexagon.get_neighbors() if current_hexagon.has_method("get_neighbors") else []
 		for neighbor in neighbors:
 			if not count_everything:
-				if not neighbor.visible or (neighbor != start_hexagon and neighbor.unit):
-					continue
+				if moving_unit and moving_unit.has_method("can_pass_through_hex"):
+					if neighbor != start_hexagon and not moving_unit.can_pass_through_hex(neighbor):
+						continue
+				else:
+					if not neighbor.visible or (neighbor != start_hexagon and neighbor.unit):
+						continue
 			
-			var cost = neighbor.get_cost(count_everything) if neighbor.has_method("get_cost") else 1
+			var cost = 1
+			if moving_unit and moving_unit.has_method("get_hex_cost"):
+				cost = moving_unit.get_hex_cost(neighbor)
+			elif neighbor.has_method("get_cost"):
+				cost = neighbor.get_cost(count_everything)
+				
 			if cost < 0:
 				continue
 				
@@ -59,3 +73,4 @@ func dijkstra_hexagonal(start_hexagon: Node2D, count_everything=false) -> Dictio
 				pq.push_back([tentative_distance, neighbor])
 	
 	return distances
+

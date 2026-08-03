@@ -238,6 +238,14 @@ tooltip_text = "Zergling"
 theme_override_font_sizes/font_size = 18
 text = "👾"
 
+[node name="BtnUnitScout" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+tooltip_text = "Scout"
+theme_override_font_sizes/font_size = 18
+text = "🚀"
+
+
 [node name="TerrainMenu" type="PanelContainer" parent="CanvasLayerUI"]
 visible = false
 anchors_preset = 2
@@ -376,6 +384,8 @@ text = "❌ Cancelar"
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine" to="." method="_on_unit_marine_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot" to="." method="_on_unit_zealot_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling" to="." method="_on_unit_zergling_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitScout" to="." method="_on_unit_scout_pressed"]
+
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainGrass" to="." method="_on_terrain_grass_pressed"]
