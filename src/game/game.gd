@@ -34,10 +34,12 @@ var player_resources: Dictionary = {
 func _ready() -> void:
 	grid = []
 	
+	resources_changed.connect(func(_idx, _e, _g): update_temp_resource_ui())
 	player_resources[0] = {"energy": initial_energy, "gold": initial_gold}
 	player_resources[1] = {"energy": initial_energy, "gold": initial_gold}
 	resources_changed.emit(0, player_resources[0]["energy"], player_resources[0]["gold"])
 	resources_changed.emit(1, player_resources[1]["energy"], player_resources[1]["gold"])
+	update_temp_resource_ui()
 	
 	if selected_map_path.is_empty():
 		selected_map_path = "res://maps/default_map.json"
@@ -297,6 +299,14 @@ func do_connections() -> void:
 			connect_down_left(i, j)
 			connect_down_center(i, j)
 			connect_down_right(i, j)
+
+func update_temp_resource_ui() -> void:
+	var p0_label = get_node_or_null("CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer/P0Label")
+	var p1_label = get_node_or_null("CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer/P1Label")
+	if p0_label:
+		p0_label.text = "[P0 Test] ⚡ Energía: " + str(get_player_energy(0)) + " | 🪙 Oro: " + str(get_player_gold(0))
+	if p1_label:
+		p1_label.text = "[P1 Test] ⚡ Energía: " + str(get_player_energy(1)) + " | 🪙 Oro: " + str(get_player_gold(1))
 
 func get_player_energy(player_idx: int) -> int:
 	return player_resources.get(player_idx, {}).get("energy", 0)
