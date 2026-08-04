@@ -44,6 +44,7 @@ static var selected_map_path: String = ""
 @onready var btn_terrain_mountain = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainMountain
 @onready var btn_terrain_water = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainWater
 @onready var btn_terrain_swamp = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainSwamp
+@onready var btn_terrain_gold_mine = $CanvasLayerUI/TerrainMenu/MarginContainer/HBoxContainer/BtnTerrainGoldMine
 
 var current_tool: String = "BRUSH" # "BRUSH", "ERASER", "UNITS"
 var current_brush_size: int = 1 # 1, 2, 3
@@ -385,17 +386,23 @@ func _on_terrain_swamp_pressed() -> void:
 	selected_terrain = "swamp"
 	update_terrain_menu_ui()
 
+func _on_terrain_gold_mine_pressed() -> void:
+	selected_terrain = "gold_mine"
+	update_terrain_menu_ui()
+
 func update_terrain_menu_ui() -> void:
 	if btn_terrain_grass: btn_terrain_grass.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "grass" else Color(1, 1, 1, 1))
 	if btn_terrain_mountain: btn_terrain_mountain.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "mountain" else Color(1, 1, 1, 1))
 	if btn_terrain_water: btn_terrain_water.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "water" else Color(1, 1, 1, 1))
 	if btn_terrain_swamp: btn_terrain_swamp.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "swamp" else Color(1, 1, 1, 1))
+	if btn_terrain_gold_mine: btn_terrain_gold_mine.set_modulate(Color(1, 1, 0.4, 1) if selected_terrain == "gold_mine" else Color(1, 1, 1, 1))
 	
 	var icon = "🌿"
 	match selected_terrain:
 		"mountain": icon = "⛰️"
 		"water": icon = "💧"
 		"swamp": icon = "🐊"
+		"gold_mine": icon = "🪙"
 	if btn_tool_brush:
 		btn_tool_brush.text = "🖌️" + icon
 
