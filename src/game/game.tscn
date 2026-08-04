@@ -19,6 +19,39 @@ script = ExtResource("2_camera")
 [node name="CanvasLayerUI" type="CanvasLayer" parent="."]
 layer = 10
 
+[node name="TempResourceHUD" type="PanelContainer" parent="CanvasLayerUI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 45.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/TempResourceHUD"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/TempResourceHUD/MarginContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="P0Label" type="Label" parent="CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "[P0 Test] ⚡ Energía: 0 | 🪙 Oro: 0"
+
+[node name="VSeparator" type="VSeparator" parent="CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="P1Label" type="Label" parent="CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "[P1 Test] ⚡ Energía: 0 | 🪙 Oro: 0"
+
 [node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
 anchors_preset = 12
 anchor_top = 1.0

@@ -18,6 +18,12 @@ signal hex_hovered
 var unit
 var terrain_type: String = "grass"
 
+var is_territory: bool = false
+var territory_group: String = ""
+var owner_player: int = -1
+var last_king_claimer: int = -1
+
+signal territory_owner_changed(hex: Node2D, old_owner: int, new_owner: int)
 
 static var _variants_cache: Dictionary = {}
 static var _hex_material: ShaderMaterial = null
@@ -36,6 +42,8 @@ func _ready():
 
 func set_terrain_type(new_type: String) -> void:
 	terrain_type = new_type
+	if terrain_type == "gold_mine" or terrain_type == "territory":
+		is_territory = true
 	var button = $TextureButton
 	if not button:
 		return
@@ -44,6 +52,27 @@ func set_terrain_type(new_type: String) -> void:
 	var texture = _load_terrain_texture(new_type)
 	if texture:
 		button.texture_normal = texture
+	update_territory_visual()
+
+func update_territory_visual() -> void:
+	if not is_territory:
+		return
+	var button = $TextureButton
+	if not button:
+		return
+	if owner_player == 0:
+		button.self_modulate = Color(0.4, 0.7, 1.0, 1.0)
+	elif owner_player == 1:
+		button.self_modulate = Color(1.0, 0.5, 0.4, 1.0)
+	else:
+		button.self_modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+func set_owner_player(new_owner: int) -> void:
+	if owner_player != new_owner:
+		var old_owner = owner_player
+		owner_player = new_owner
+		update_territory_visual()
+		territory_owner_changed.emit(self, old_owner, new_owner)
 
 func is_walkable() -> bool:
 	return terrain_type != "mountain" and terrain_type != "water"
