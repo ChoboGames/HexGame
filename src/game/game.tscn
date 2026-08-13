@@ -52,6 +52,63 @@ theme_override_colors/font_color = Color(1, 0.5, 0.4, 1)
 theme_override_font_sizes/font_size = 16
 text = "[P1 Test] ⚡ Energía: 0 | 🪙 Oro: 0"
 
+[node name="UnitInfoBar" type="PanelContainer" parent="CanvasLayerUI"]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -124.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/UnitInfoBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/UnitInfoBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="UnitNameLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "Unidad"
+
+[node name="HPLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "❤ Vida: 0/0"
+
+[node name="DamageLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "⚔ Daño: 0"
+
+[node name="RangeLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🎯 Rango: 0"
+
+[node name="MovementLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "👣 Pasos: 0/0"
+
+[node name="AttackStatusLabel" type="Label" parent="CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✓ Puede atacar"
+
 [node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
 anchors_preset = 12
 anchor_top = 1.0

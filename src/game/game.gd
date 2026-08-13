@@ -18,6 +18,13 @@ signal territory_control_updated(hex: Node2D, owner_player: int)
 @onready var turn_label = $CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/Turn
 @onready var victory_panel = $CanvasLayerUI/VictoryPanel
 @onready var victory_message = $CanvasLayerUI/VictoryPanel/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryMessage
+@onready var unit_info_bar = $CanvasLayerUI/UnitInfoBar
+@onready var unit_name_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/UnitNameLabel
+@onready var unit_hp_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/HPLabel
+@onready var unit_damage_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/DamageLabel
+@onready var unit_range_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/RangeLabel
+@onready var unit_movement_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/MovementLabel
+@onready var unit_attack_status_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/AttackStatusLabel
 
 var turn = 0
 var distance_objects = {}
@@ -86,6 +93,7 @@ func clear_selection() -> void:
 	distance_objects = {}
 	attack_objects = []
 	reset_colors()
+	hide_unit_info_bar()
 
 func highlight_movement_range(hex, range_val: int = 0) -> Dictionary:
 	hex.set_modulate(Color(0.5, 1, 0.5, 1))
@@ -124,6 +132,30 @@ func show_available_actions(hex) -> void:
 		attack_objects = highlight_attack_range(hex, unit.range)
 	else:
 		attack_objects = []
+	update_unit_info_bar(unit)
+
+func update_unit_info_bar(unit) -> void:
+	if not unit_info_bar:
+		return
+	var display_name = unit.unit_letter
+	if unit.stats and unit.stats.unit_name.length() > 0:
+		display_name = unit.stats.unit_name
+	unit_name_label.text = "🔫 " + display_name
+	unit_hp_label.text = "❤ Vida: " + str(unit.hp) + "/" + str(unit.base_hp)
+	unit_damage_label.text = "⚔ Daño: " + str(unit.damage)
+	unit_range_label.text = "🎯 Rango: " + str(unit.range)
+	unit_movement_label.text = "👣 Pasos: " + str(unit.movement - unit.movement_used) + "/" + str(unit.movement)
+	if unit.has_attacked:
+		unit_attack_status_label.text = "✗ Ya atacó"
+		unit_attack_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6, 1))
+	else:
+		unit_attack_status_label.text = "✓ Puede atacar"
+		unit_attack_status_label.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5, 1))
+	unit_info_bar.visible = true
+
+func hide_unit_info_bar() -> void:
+	if unit_info_bar:
+		unit_info_bar.visible = false
 
 func clear_units() -> void:
 	for i in range(height):
