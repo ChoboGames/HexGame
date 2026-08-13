@@ -7,6 +7,14 @@ static var selected_map_path: String = ""
 @export var width = 6
 @export var height = 6
 
+@export var initial_energy: int = 0
+@export var initial_gold: int = 0
+@export var energy_per_turn: int = 1
+@export var gold_per_turn: int = 1
+
+signal resources_changed(player_index: int, energy: int, gold: int)
+signal territory_control_updated(hex: Node2D, owner_player: int)
+
 @onready var turn_label = $CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/Turn
 @onready var victory_panel = $CanvasLayerUI/VictoryPanel
 @onready var victory_message = $CanvasLayerUI/VictoryPanel/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryMessage
@@ -18,8 +26,20 @@ var old_hex = null
 var grid = []
 var is_game_over: bool = false
 
+var player_resources: Dictionary = {
+	0: {"energy": 0, "gold": 0},
+	1: {"energy": 0, "gold": 0}
+}
+
 func _ready() -> void:
 	grid = []
+	
+	resources_changed.connect(func(_idx, _e, _g): update_temp_resource_ui())
+	player_resources[0] = {"energy": initial_energy, "gold": initial_gold}
+	player_resources[1] = {"energy": initial_energy, "gold": initial_gold}
+	resources_changed.emit(0, player_resources[0]["energy"], player_resources[0]["gold"])
+	resources_changed.emit(1, player_resources[1]["energy"], player_resources[1]["gold"])
+	update_temp_resource_ui()
 	
 	if selected_map_path.is_empty():
 		selected_map_path = "res://maps/default_map.json"
@@ -280,13 +300,106 @@ func do_connections() -> void:
 			connect_down_center(i, j)
 			connect_down_right(i, j)
 
+func update_temp_resource_ui() -> void:
+	var p0_label = get_node_or_null("CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer/P0Label")
+	var p1_label = get_node_or_null("CanvasLayerUI/TempResourceHUD/MarginContainer/HBoxContainer/P1Label")
+	if p0_label:
+		p0_label.text = "[P0 Test] ⚡ Energía: " + str(get_player_energy(0)) + " | 🪙 Oro: " + str(get_player_gold(0))
+	if p1_label:
+		p1_label.text = "[P1 Test] ⚡ Energía: " + str(get_player_energy(1)) + " | 🪙 Oro: " + str(get_player_gold(1))
+
+func get_player_energy(player_idx: int) -> int:
+	return player_resources.get(player_idx, {}).get("energy", 0)
+
+func get_player_gold(player_idx: int) -> int:
+	return player_resources.get(player_idx, {}).get("gold", 0)
+
+func add_player_energy(player_idx: int, amount: int) -> void:
+	if not player_resources.has(player_idx):
+		player_resources[player_idx] = {"energy": 0, "gold": 0}
+	player_resources[player_idx]["energy"] += amount
+	resources_changed.emit(player_idx, player_resources[player_idx]["energy"], player_resources[player_idx]["gold"])
+
+func add_player_gold(player_idx: int, amount: int) -> void:
+	if not player_resources.has(player_idx):
+		player_resources[player_idx] = {"energy": 0, "gold": 0}
+	player_resources[player_idx]["gold"] += amount
+	resources_changed.emit(player_idx, player_resources[player_idx]["energy"], player_resources[player_idx]["gold"])
+
+func set_player_energy(player_idx: int, amount: int) -> void:
+	if not player_resources.has(player_idx):
+		player_resources[player_idx] = {"energy": 0, "gold": 0}
+	player_resources[player_idx]["energy"] = amount
+	resources_changed.emit(player_idx, player_resources[player_idx]["energy"], player_resources[player_idx]["gold"])
+
+func set_player_gold(player_idx: int, amount: int) -> void:
+	if not player_resources.has(player_idx):
+		player_resources[player_idx] = {"energy": 0, "gold": 0}
+	player_resources[player_idx]["gold"] = amount
+	resources_changed.emit(player_idx, player_resources[player_idx]["energy"], player_resources[player_idx]["gold"])
+
+func get_controlled_territories_count(player_idx: int) -> int:
+	var count = 0
+	for i in range(height):
+		for j in range(width):
+			var hex = grid[i][j]
+			if hex and hex.activated and hex.is_territory and hex.owner_player == player_idx:
+				count += 1
+	return count
+
+func update_territory_control() -> void:
+	var ending_player = turn
+	var territory_hexes = []
+	for i in range(height):
+		for j in range(width):
+			var hex = grid[i][j]
+			if hex and hex.activated and hex.is_territory:
+				territory_hexes.append(hex)
+				
+	for hex in territory_hexes:
+		var ending_player_king_present = false
+		var rival_king_present = false
+		var rival_player = 1 - ending_player
+		
+		if hex.unit and hex.unit.is_king():
+			if hex.unit.player_index == ending_player:
+				ending_player_king_present = true
+			elif hex.unit.player_index == rival_player:
+				rival_king_present = true
+				
+		var current_owner = hex.owner_player
+		var new_owner = current_owner
+		
+		if ending_player_king_present:
+			new_owner = ending_player
+			hex.last_king_claimer = ending_player
+		elif current_owner == ending_player and not ending_player_king_present:
+			if rival_king_present:
+				new_owner = rival_player
+				hex.last_king_claimer = rival_player
+			else:
+				if hex.last_king_claimer != -1:
+					new_owner = hex.last_king_claimer
+					
+		if new_owner != current_owner:
+			hex.set_owner_player(new_owner)
+			territory_control_updated.emit(hex, new_owner)
+
 func _on_finish_turn_pressed() -> void:
 	if is_game_over:
 		return
 	clear_selection()
+	
+	update_territory_control()
+	
 	turn = int(!turn)
 	if turn_label:
 		turn_label.text = str(turn)
+		
+	add_player_energy(turn, energy_per_turn)
+	var territories_owned = get_controlled_territories_count(turn)
+	add_player_gold(turn, gold_per_turn * territories_owned)
+	
 	for i in range(height):
 		for j in range(width):
 			if grid[i][j] and grid[i][j].unit:
