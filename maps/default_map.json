@@ -12,8 +12,8 @@
   ],
   "units": [
     { "i": 1, "j": 1, "unit_type": "king", "player_index": 0 },
-    { "i": 1, "j": 0, "unit_type": "marine", "player_index": 0 },
+    { "i": 1, "j": 0, "unit_type": "archer", "player_index": 0 },
     { "i": 4, "j": 4, "unit_type": "king", "player_index": 1 },
-    { "i": 4, "j": 5, "unit_type": "zergling", "player_index": 1 }
+    { "i": 4, "j": 5, "unit_type": "wolf", "player_index": 1 }
   ]
 }

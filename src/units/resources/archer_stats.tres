@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_unitstats")
-unit_name = "Marine"
-unit_letter = "M"
+unit_name = "Archer"
+unit_letter = "A"
 base_hp = 10
 damage = 3
 movement = 1

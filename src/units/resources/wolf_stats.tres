@@ -4,12 +4,11 @@
 
 [resource]
 script = ExtResource("1_unitstats")
-unit_name = "Scout"
-unit_letter = "S"
+unit_name = "Wolf"
+unit_letter = "W"
 base_hp = 8
 damage = 3
 movement = 3
-range = 2
-is_flying = true
-energy_cost = 3
-resource_cost = 2
+range = 1
+energy_cost = 2
+resource_cost = 1

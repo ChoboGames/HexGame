@@ -29,10 +29,10 @@ static var selected_map_path: String = ""
 @onready var btn_player_1 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer1
 @onready var btn_player_2 = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer2
 @onready var btn_unit_king = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitKing
-@onready var btn_unit_marine = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine
-@onready var btn_unit_zealot = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot
-@onready var btn_unit_zergling = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling
-@onready var btn_unit_scout = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitScout
+@onready var btn_unit_archer = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitArcher
+@onready var btn_unit_soldier = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitSoldier
+@onready var btn_unit_wolf = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitWolf
+@onready var btn_unit_eagle = $CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitEagle
 
 
 @onready var dim_overlay = $CanvasLayerUI/DimOverlay
@@ -48,7 +48,7 @@ static var selected_map_path: String = ""
 
 var current_tool: String = "BRUSH" # "BRUSH", "ERASER", "UNITS"
 var current_brush_size: int = 1 # 1, 2, 3
-var selected_unit_type: String = "marine"
+var selected_unit_type: String = "archer"
 var selected_player_index: int = 0
 var selected_terrain: String = "grass"
 
@@ -81,7 +81,7 @@ func _ready() -> void:
 	terrain_menu.visible = false
 	_on_size_1_pressed()
 	_on_player_1_pressed()
-	_on_unit_marine_pressed()
+	_on_unit_archer_pressed()
 	_on_terrain_grass_pressed()
 	update_overlay()
 	update_undo_redo_ui()
@@ -112,15 +112,13 @@ func get_map_snapshot() -> Dictionary:
 			terrain = hex.terrain_type
 		active_coords.append([c.x, c.y, terrain])
 		if hex and hex.unit:
-			var unit_type = "marine"
+			var unit_type = "archer"
 			if hex.unit.stats:
 				unit_type = hex.unit.stats.unit_name.to_lower()
 			elif not hex.unit.scene_file_path.is_empty():
 				unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
 			else:
 				unit_type = hex.unit.name.to_lower()
-			if unit_type == "ling":
-				unit_type = "zergling"
 			units_data.append({
 				"i": c.x,
 				"j": c.y,
@@ -305,7 +303,7 @@ func apply_map_data(map_data: Dictionary) -> void:
 	for unit_data in saved_units:
 		var i = int(unit_data.get("i", 0))
 		var j = int(unit_data.get("j", 0))
-		var unit_type = str(unit_data.get("unit_type", "marine"))
+		var unit_type = str(unit_data.get("unit_type", "archer"))
 		var player_idx = int(unit_data.get("player_index", 0))
 		var hex = get_or_create_hex(Vector2i(i, j))
 		spawn_unit_at(hex, unit_type, player_idx)
@@ -321,9 +319,7 @@ func _on_clear_canvas_pressed_internal() -> void:
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	var clean_type = unit_type.to_lower()
-	if clean_type == "ling":
-		clean_type = "zergling"
-		
+
 	var unit_scene = load("res://src/units/unit.tscn").instantiate()
 	var stats_path = "res://src/units/resources/" + clean_type + "_stats.tres"
 	
@@ -446,29 +442,28 @@ func _on_unit_king_pressed() -> void:
 	selected_unit_type = "king"
 	highlight_unit_button(btn_unit_king)
 
-func _on_unit_marine_pressed() -> void:
-	selected_unit_type = "marine"
-	highlight_unit_button(btn_unit_marine)
+func _on_unit_archer_pressed() -> void:
+	selected_unit_type = "archer"
+	highlight_unit_button(btn_unit_archer)
 
-func _on_unit_zealot_pressed() -> void:
-	selected_unit_type = "zealot"
-	highlight_unit_button(btn_unit_zealot)
+func _on_unit_soldier_pressed() -> void:
+	selected_unit_type = "soldier"
+	highlight_unit_button(btn_unit_soldier)
 
-func _on_unit_zergling_pressed() -> void:
-	selected_unit_type = "zergling"
-	highlight_unit_button(btn_unit_zergling)
+func _on_unit_wolf_pressed() -> void:
+	selected_unit_type = "wolf"
+	highlight_unit_button(btn_unit_wolf)
 
-func _on_unit_scout_pressed() -> void:
-	selected_unit_type = "scout"
-	highlight_unit_button(btn_unit_scout)
+func _on_unit_eagle_pressed() -> void:
+	selected_unit_type = "eagle"
+	highlight_unit_button(btn_unit_eagle)
 
 func highlight_unit_button(target_btn) -> void:
 	btn_unit_king.set_modulate(Color(1, 1, 1, 1))
-	btn_unit_marine.set_modulate(Color(1, 1, 1, 1))
-	btn_unit_zealot.set_modulate(Color(1, 1, 1, 1))
-	btn_unit_zergling.set_modulate(Color(1, 1, 1, 1))
-	if btn_unit_scout:
-		btn_unit_scout.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_archer.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_soldier.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_wolf.set_modulate(Color(1, 1, 1, 1))
+	btn_unit_eagle.set_modulate(Color(1, 1, 1, 1))
 	target_btn.set_modulate(Color(1, 1, 0.4, 1))
 
 
@@ -547,17 +542,14 @@ func _on_save_map_pressed() -> void:
 	for c in coords:
 		var hex = active_hexes[c]
 		if hex and hex.unit:
-			var unit_type = "marine"
+			var unit_type = "archer"
 			if hex.unit.stats:
 				unit_type = hex.unit.stats.unit_name.to_lower()
 			elif not hex.unit.scene_file_path.is_empty():
 				unit_type = hex.unit.scene_file_path.get_file().get_basename().to_lower()
 			else:
 				unit_type = hex.unit.name.to_lower()
-			
-			if unit_type == "ling":
-				unit_type = "zergling"
-				
+
 			units_data.append({
 				"i": c.x - min_i,
 				"j": c.y - min_j,

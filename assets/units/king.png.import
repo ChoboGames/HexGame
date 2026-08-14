@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bktmk001q28nr"
-path="res://.godot/imported/zergling.png-0333259dedff1018019c0dd4bc398c45.ctex"
+uid="uid://c8mibevyb5x78"
+path="res://.godot/imported/king.png-07df7d1158a9b89560144d39a12387f4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/units/zergling.png"
-dest_files=["res://.godot/imported/zergling.png-0333259dedff1018019c0dd4bc398c45.ctex"]
+source_file="res://assets/units/king.png"
+dest_files=["res://.godot/imported/king.png-07df7d1158a9b89560144d39a12387f4.ctex"]
 
 [params]
 

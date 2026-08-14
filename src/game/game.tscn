@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://c8k91jxy28mop"]
+[gd_scene load_steps=8 format=3 uid="uid://c8k91jxy28mop"]
 
 [ext_resource type="Script" path="res://src/game/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://src/camera/camera_controller.gd" id="2_camera"]
 [ext_resource type="PackedScene" uid="uid://fnhh1cpxbkdk" path="res://src/pathfinding/dijkstra.tscn" id="3_dijkstra"]
+[ext_resource type="Texture2D" path="res://assets/units/archer.png" id="4_icon_archer"]
+[ext_resource type="Texture2D" path="res://assets/units/wolf.png" id="5_icon_wolf"]
+[ext_resource type="Texture2D" path="res://assets/units/eagle.png" id="6_icon_eagle"]
+[ext_resource type="Texture2D" path="res://assets/units/soldier.png" id="7_icon_soldier"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -138,25 +142,33 @@ theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 16
 text = "👑 Invocar:"
 
-[node name="BtnSummonMarine" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+[node name="BtnSummonArcher" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "🔫 Marine (2⚡ 1🪙)"
+icon = ExtResource("4_icon_archer")
+theme_override_constants/icon_max_width = 20
+text = "🏹 Archer (2⚡ 1🪙)"
 
-[node name="BtnSummonZergling" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+[node name="BtnSummonWolf" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "🐜 Zergling (2⚡ 1🪙)"
+icon = ExtResource("5_icon_wolf")
+theme_override_constants/icon_max_width = 20
+text = "🐺 Wolf (2⚡ 1🪙)"
 
-[node name="BtnSummonScout" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+[node name="BtnSummonEagle" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "🕊 Scout (3⚡ 2🪙)"
+icon = ExtResource("6_icon_eagle")
+theme_override_constants/icon_max_width = 20
+text = "🦅 Eagle (3⚡ 2🪙)"
 
-[node name="BtnSummonZealot" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+[node name="BtnSummonSoldier" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "⚔ Zealot (4⚡ 3🪙)"
+icon = ExtResource("7_icon_soldier")
+theme_override_constants/icon_max_width = 20
+text = "🗡 Soldier (4⚡ 3🪙)"
 
 [node name="BtnSummonCancel" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
@@ -210,10 +222,10 @@ text = "⌛ Terminar Turno"
 
 [connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/GameBackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/FinishTurn" to="." method="_on_finish_turn_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonMarine" to="." method="_on_summon_marine_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZergling" to="." method="_on_summon_zergling_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonScout" to="." method="_on_summon_scout_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZealot" to="." method="_on_summon_zealot_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonArcher" to="." method="_on_summon_archer_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonWolf" to="." method="_on_summon_wolf_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonEagle" to="." method="_on_summon_eagle_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonSoldier" to="." method="_on_summon_soldier_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonCancel" to="." method="_on_summon_cancel_pressed"]
 
 [node name="VictoryPanel" type="ColorRect" parent="CanvasLayerUI"]

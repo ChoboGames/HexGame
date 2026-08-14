@@ -1,8 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://cq8h7rdp0siyg"]
+[gd_scene load_steps=10 format=3 uid="uid://cq8h7rdp0siyg"]
 
 [ext_resource type="Script" path="res://src/map_editor/map_editor.gd" id="1_4scgd"]
 [ext_resource type="Script" path="res://src/camera/camera_controller.gd" id="2_camera"]
 [ext_resource type="Script" path="res://src/map_editor/grid_overlay.gd" id="3_grid_overlay"]
+[ext_resource type="Texture2D" path="res://assets/units/king.png" id="4_icon_king"]
+[ext_resource type="Texture2D" path="res://assets/units/archer.png" id="5_icon_archer"]
+[ext_resource type="Texture2D" path="res://assets/units/soldier.png" id="6_icon_soldier"]
+[ext_resource type="Texture2D" path="res://assets/units/wolf.png" id="7_icon_wolf"]
+[ext_resource type="Texture2D" path="res://assets/units/eagle.png" id="8_icon_eagle"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
 bg_color = Color(0.14, 0.16, 0.24, 0.98)
@@ -215,35 +220,45 @@ custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 tooltip_text = "Rey (King)"
 theme_override_font_sizes/font_size = 18
-text = "👑"
+icon = ExtResource("4_icon_king")
+theme_override_constants/icon_max_width = 20
+text = ""
 
-[node name="BtnUnitMarine" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+[node name="BtnUnitArcher" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-tooltip_text = "Marine"
+tooltip_text = "Archer"
 theme_override_font_sizes/font_size = 18
-text = "🛡️"
+icon = ExtResource("5_icon_archer")
+theme_override_constants/icon_max_width = 20
+text = ""
 
-[node name="BtnUnitZealot" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+[node name="BtnUnitSoldier" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-tooltip_text = "Zealot"
+tooltip_text = "Soldier"
 theme_override_font_sizes/font_size = 18
-text = "🗡️"
+icon = ExtResource("6_icon_soldier")
+theme_override_constants/icon_max_width = 20
+text = ""
 
-[node name="BtnUnitZergling" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+[node name="BtnUnitWolf" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-tooltip_text = "Zergling"
+tooltip_text = "Wolf"
 theme_override_font_sizes/font_size = 18
-text = "👾"
+icon = ExtResource("7_icon_wolf")
+theme_override_constants/icon_max_width = 20
+text = ""
 
-[node name="BtnUnitScout" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
+[node name="BtnUnitEagle" type="Button" parent="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
-tooltip_text = "Scout"
+tooltip_text = "Eagle"
 theme_override_font_sizes/font_size = 18
-text = "🚀"
+icon = ExtResource("8_icon_eagle")
+theme_override_constants/icon_max_width = 20
+text = ""
 
 
 [node name="TerrainMenu" type="PanelContainer" parent="CanvasLayerUI"]
@@ -388,10 +403,10 @@ text = "❌ Cancelar"
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer1" to="." method="_on_player_1_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnPlayer2" to="." method="_on_player_2_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitKing" to="." method="_on_unit_king_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitMarine" to="." method="_on_unit_marine_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZealot" to="." method="_on_unit_zealot_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitZergling" to="." method="_on_unit_zergling_pressed"]
-[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitScout" to="." method="_on_unit_scout_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitArcher" to="." method="_on_unit_archer_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitSoldier" to="." method="_on_unit_soldier_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitWolf" to="." method="_on_unit_wolf_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/EditorToolBar/MarginContainer/HBoxContainer/UnitsContainer/BtnUnitEagle" to="." method="_on_unit_eagle_pressed"]
 
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/ConfirmLoadBtn" to="." method="_on_confirm_load_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/LoadMapPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelLoadBtn" to="." method="_on_cancel_load_pressed"]

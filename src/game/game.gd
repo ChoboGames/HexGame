@@ -26,10 +26,10 @@ signal territory_control_updated(hex: Node2D, owner_player: int)
 @onready var unit_movement_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/MovementLabel
 @onready var unit_attack_status_label = $CanvasLayerUI/UnitInfoBar/MarginContainer/HBoxContainer/AttackStatusLabel
 @onready var summon_panel = $CanvasLayerUI/SummonPanel
-@onready var btn_summon_marine = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonMarine
-@onready var btn_summon_zergling = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZergling
-@onready var btn_summon_scout = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonScout
-@onready var btn_summon_zealot = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZealot
+@onready var btn_summon_archer = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonArcher
+@onready var btn_summon_wolf = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonWolf
+@onready var btn_summon_eagle = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonEagle
+@onready var btn_summon_soldier = $CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonSoldier
 
 var turn = 0
 var distance_objects = {}
@@ -40,7 +40,7 @@ var is_game_over: bool = false
 var summon_mode: bool = false
 var summon_type: String = ""
 var summon_hexes: Array = []
-var summonable_types: Array = ["marine", "zergling", "scout", "zealot"]
+var summonable_types: Array = ["archer", "wolf", "eagle", "soldier"]
 
 var player_resources: Dictionary = {
 	0: {"energy": 0, "gold": 0},
@@ -206,16 +206,14 @@ func apply_map_data(map_data: Dictionary) -> void:
 	for unit_data in saved_units:
 		var i = int(unit_data.get("i", 0))
 		var j = int(unit_data.get("j", 0))
-		var unit_type = str(unit_data.get("unit_type", "marine"))
+		var unit_type = str(unit_data.get("unit_type", "archer"))
 		var player_idx = int(unit_data.get("player_index", 0))
 		if i >= 0 and i < height and j >= 0 and j < width:
 			spawn_unit_at(grid[i][j], unit_type, player_idx)
 
 func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 	var clean_type = unit_type.to_lower()
-	if clean_type == "ling":
-		clean_type = "zergling"
-		
+
 	var unit_scene = load("res://src/units/unit.tscn").instantiate()
 	var stats_path = "res://src/units/resources/" + clean_type + "_stats.tres"
 	
@@ -233,8 +231,6 @@ func spawn_unit_at(hex, unit_type: String, player_idx: int) -> void:
 
 func get_unit_stats(unit_type: String) -> Resource:
 	var clean_type = unit_type.to_lower()
-	if clean_type == "ling":
-		clean_type = "zergling"
 	var stats_path = "res://src/units/resources/" + clean_type + "_stats.tres"
 	if ResourceLoader.exists(stats_path):
 		return load(stats_path)
@@ -261,14 +257,14 @@ func can_afford(player_idx: int, stats) -> bool:
 
 func get_summon_button(unit_type: String):
 	match unit_type:
-		"marine":
-			return btn_summon_marine
-		"zergling":
-			return btn_summon_zergling
-		"scout":
-			return btn_summon_scout
-		"zealot":
-			return btn_summon_zealot
+		"archer":
+			return btn_summon_archer
+		"wolf":
+			return btn_summon_wolf
+		"eagle":
+			return btn_summon_eagle
+		"soldier":
+			return btn_summon_soldier
 	return null
 
 func update_summon_panel(king_hex) -> void:
@@ -338,17 +334,17 @@ func do_summon(hex) -> void:
 	summon_hexes = []
 	show_available_actions(old_hex)
 
-func _on_summon_marine_pressed() -> void:
-	start_summon_mode("marine")
+func _on_summon_archer_pressed() -> void:
+	start_summon_mode("archer")
 
-func _on_summon_zergling_pressed() -> void:
-	start_summon_mode("zergling")
+func _on_summon_wolf_pressed() -> void:
+	start_summon_mode("wolf")
 
-func _on_summon_scout_pressed() -> void:
-	start_summon_mode("scout")
+func _on_summon_eagle_pressed() -> void:
+	start_summon_mode("eagle")
 
-func _on_summon_zealot_pressed() -> void:
-	start_summon_mode("zealot")
+func _on_summon_soldier_pressed() -> void:
+	start_summon_mode("soldier")
 
 func _on_summon_cancel_pressed() -> void:
 	if summon_mode:

@@ -1,5 +1,16 @@
 extends Node2D
 
+const DISC_DIAMETER := 460.0
+const RING_WIDTH := 28.0
+const PLAYER_COLORS: Array = [
+	Color(0, 0.5, 1, 1),
+	Color(1, 0.5, 0, 1)
+]
+
+static var _icon_materials: Dictionary = {}
+static var _ring_materials: Dictionary = {}
+static var _white_texture: ImageTexture = null
+
 @export var stats: UnitStats:
 	set(value):
 		stats = value
@@ -31,10 +42,12 @@ func refresh():
 	update_action_visual()
 
 func update_action_visual():
-	var color = Color(1 * player_index, 0.5, 1 * (1 - player_index), 1)
-	if is_exhausted():
-		color.a = 0.4
-	set_modulate(color)
+	if has_node("Ring"):
+		var ring_material = _get_ring_material(player_index)
+		if ring_material:
+			$Ring.material = ring_material
+	var alpha = 0.4 if is_exhausted() else 1.0
+	set_modulate(Color(1, 1, 1, alpha))
 
 func apply_stats():
 	if stats:
@@ -43,13 +56,61 @@ func apply_stats():
 		damage = stats.damage
 		movement = stats.movement
 		range = stats.range
-		
+
+	var icon: Texture2D = null
+	if stats:
+		icon = UnitStats.get_icon_for_type(stats.unit_name)
+	if has_node("Icon"):
+		$Icon.texture = icon
+		if icon:
+			var target: float = DISC_DIAMETER
+			var tex_min: int = min(icon.get_width(), icon.get_height())
+			if tex_min > 0:
+				var s: float = target / tex_min
+				$Icon.scale = Vector2(s, s)
+				var icon_material = _get_icon_material(icon)
+				if icon_material:
+					$Icon.material = icon_material
 	if has_node("Label"):
+		$Label.visible = icon == null
 		$Label.text = unit_letter
 	set_hp(base_hp if base_hp > 0 else 10)
 
+static func _get_icon_material(icon: Texture2D) -> ShaderMaterial:
+	var key := Vector2i(icon.get_width(), icon.get_height())
+	if not _icon_materials.has(key):
+		var shader := load("res://src/units/icon_mask.gdshader")
+		if shader:
+			var material := ShaderMaterial.new()
+			material.shader = shader
+			material.set_shader_parameter("icon_size", Vector2(key))
+			_icon_materials[key] = material
+	return _icon_materials[key]
+
+static func _get_ring_material(player_index: int) -> ShaderMaterial:
+	if not _ring_materials.has(player_index):
+		var shader := load("res://src/units/ring_mask.gdshader")
+		if shader:
+			var material := ShaderMaterial.new()
+			material.shader = shader
+			material.set_shader_parameter("ring_color", PLAYER_COLORS[player_index])
+			material.set_shader_parameter("quad_size", Vector2(DISC_DIAMETER, DISC_DIAMETER))
+			material.set_shader_parameter("ring_width", RING_WIDTH)
+			_ring_materials[player_index] = material
+	return _ring_materials[player_index]
+
+static func _get_white_texture() -> ImageTexture:
+	if _white_texture == null:
+		var image := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+		image.fill(Color(1, 1, 1, 1))
+		_white_texture = ImageTexture.create_from_image(image)
+	return _white_texture
+
 func _ready():
 	z_index = 10
+	if has_node("Ring"):
+		$Ring.texture = _get_white_texture()
+		$Ring.scale = Vector2(DISC_DIAMETER / 4.0, DISC_DIAMETER / 4.0)
 	apply_stats()
 	set_player_index(player_index)
 
