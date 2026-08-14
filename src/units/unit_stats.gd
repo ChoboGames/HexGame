@@ -8,4 +8,6 @@ extends Resource
 @export var movement: int = 2
 @export var range: int = 1
 @export var is_flying: bool = false
+@export var energy_cost: int = 0
+@export var resource_cost: int = 0
 

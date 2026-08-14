@@ -11,3 +11,5 @@ damage = 3
 movement = 3
 range = 2
 is_flying = true
+energy_cost = 3
+resource_cost = 2

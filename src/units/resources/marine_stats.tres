@@ -10,3 +10,5 @@ base_hp = 10
 damage = 3
 movement = 1
 range = 2
+energy_cost = 2
+resource_cost = 1

@@ -109,6 +109,60 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "✓ Puede atacar"
 
+[node name="SummonPanel" type="PanelContainer" parent="CanvasLayerUI"]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -190.0
+offset_bottom = -126.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayerUI/SummonPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayerUI/SummonPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="SummonTitleLabel" type="Label" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "👑 Invocar:"
+
+[node name="BtnSummonMarine" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🔫 Marine (2⚡ 1🪙)"
+
+[node name="BtnSummonZergling" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🐜 Zergling (2⚡ 1🪙)"
+
+[node name="BtnSummonScout" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🕊 Scout (3⚡ 2🪙)"
+
+[node name="BtnSummonZealot" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⚔ Zealot (4⚡ 3🪙)"
+
+[node name="BtnSummonCancel" type="Button" parent="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✕ Cancelar"
+
 [node name="GameHUD" type="PanelContainer" parent="CanvasLayerUI"]
 anchors_preset = 12
 anchor_top = 1.0
@@ -156,6 +210,11 @@ text = "⌛ Terminar Turno"
 
 [connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/GameBackToMenuBtn" to="." method="_on_back_to_menu_pressed"]
 [connection signal="pressed" from="CanvasLayerUI/GameHUD/MarginContainer/HBoxContainer/FinishTurn" to="." method="_on_finish_turn_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonMarine" to="." method="_on_summon_marine_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZergling" to="." method="_on_summon_zergling_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonScout" to="." method="_on_summon_scout_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonZealot" to="." method="_on_summon_zealot_pressed"]
+[connection signal="pressed" from="CanvasLayerUI/SummonPanel/MarginContainer/HBoxContainer/BtnSummonCancel" to="." method="_on_summon_cancel_pressed"]
 
 [node name="VictoryPanel" type="ColorRect" parent="CanvasLayerUI"]
 visible = false
